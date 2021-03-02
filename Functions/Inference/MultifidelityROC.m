@@ -1,7 +1,7 @@
 function [FP, FN, TP, TN] = MultifidelityROC(N,p,s,rho,epsilon,s_approx,rho_approx,epsilon_approx)
 
-%% Early accept/reject multifidelity for approximate Bayesian computaion to compute
-% the posterior mean
+%% Burn-in run to compute false/true positive/negative rates
+% TODO - record simulation times
 %
 % Inputs:
 %    N - Number of samples
@@ -14,7 +14,12 @@ function [FP, FN, TP, TN] = MultifidelityROC(N,p,s,rho,epsilon,s_approx,rho_appr
 %    epsilon_approx - approximate discrepancy treshold
 %
 % Outputs:
+%    FP - proportion with (rho_approx < epsilon_approx) & (rho > epsilon)
+%    FN - proportion with (rho_approx > epsilon_approx) & (rho < epsilon)
+%    TP - proportion with (rho_approx < epsilon_approx) & (rho < epsilon)
+%    TN - proportion with (rho_approx > epsilon_approx) & (rho > epsilon)
 %
+% 
 % Authors:
 %   Thomas P. Prescott[1] (prescott@maths.ox.ac.uk)
 %   David J. Warne[2,3,4] (david.warne@qut.edu.au)

@@ -30,13 +30,13 @@ kmin = [eps;eps;eps];
 
 %% Set up ABC MLMC 
 % discrepancy threshold sequence
-epsilon = [40;20;10;5;2.5];
+epsilon = [40;20;10;5;2.5]; % TODO: vary as tuning param with L
 % create uniform joint prior
 supp0.l = kmin;
 supp0.u = kmax;
 p = @(l,u) unifrnd(l,u);
 % sequence of sample numbers
-N = [800;400;200;100;50];
+N = [800;400;200;100;50]; % TODO: apply optimal choice 
 
 %% Run and time ABC MLMC
 fprintf('Running ABC MLMC...\n');
@@ -44,6 +44,23 @@ tic;
 [E_mlmc,V_mlmc,F_mlmc] = ABCMLMC(N,p,supp0,f,rho,epsilon)
 C_mlmc = toc;
 fprintf('ABC MLMC Completed in %f Sec\n',C_mlmc);
+
+%% Set up ABC Mulitfidelity
+tau = 2;
+f_approx = @(k) GenerateApproxObservations(michment,k,X0,1,[4],t,2,tau);
+eta1 = 0.25;
+eta2 = 0.12;
+epsilon = 2.5;
+% Prior sampler
+p = @() unifrnd(kmin,kmax);
+N = 200000;
+
+%% Run and Time ABC Multifidelity
+fprintf('Running ABC Multifidelity ...\n');
+tic;
+[E_mf,V_mf,ESS_mf] = ABCMultifidelity(N,p,f,rho,epsilon,f_approx,rho,epsilon,eta1,eta2,@(x)x(1,:));
+C_mf = toc;
+fprintf('ABC Multifidelity Completed in %f Sec\n',C_mf)
 
 %% Set up ABC Rejection
 % discrepancy threshold
@@ -76,7 +93,7 @@ K_pdf = @(k_n,k_p) mvnpdf(k_n,k_p,Sigma);
 % number of steps in the Markov Chain
 T = 500000;
 burnin = 100000;
-thin = 10000;
+thin = 1000;
 
 %% Run and ABC MCMC
 tic;

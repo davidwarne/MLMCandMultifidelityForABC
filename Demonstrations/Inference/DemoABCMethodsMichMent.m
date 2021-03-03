@@ -48,17 +48,20 @@ fprintf('ABC MLMC Completed in %f Sec\n',C_mlmc);
 %% Set up ABC Mulitfidelity
 tau = 2;
 f_approx = @(k) GenerateApproxObservations(michment,k,X0,1,[4],t,2,tau);
-eta1 = 0.25;
-eta2 = 0.12;
 epsilon = 2.5;
-% Prior sampler
 p = @() unifrnd(kmin,kmax);
+%N = 20000;
+%tic;
+%[eta1,eta2,p_fp,p_fn,p_tp,p_tn,ctilde,cp,cn,rho_dist,rho_dist_approx] = MultifidelityROC(N,p,f,rho,5,f_approx,rho,5);
+%C_mfroc= toc;
+%fprintf('ABC Multifidelity optimisation in %f Sec\n',C_mfroc)
+% Prior sampler
 N = 200000;
-
+M = N/10;
 %% Run and Time ABC Multifidelity
 fprintf('Running ABC Multifidelity ...\n');
 tic;
-[E_mf,V_mf,ESS_mf] = ABCMultifidelity(N,p,f,rho,epsilon,f_approx,rho,epsilon,eta1,eta2,@(x)x(1,:));
+[E_mf,V_mf,ESS_mf] = ABCAdaptiveMultifidelity(N,M,p,f,rho,epsilon,f_approx,rho,epsilon,@(x)x(1,:));
 C_mf = toc;
 fprintf('ABC Multifidelity Completed in %f Sec\n',C_mf)
 

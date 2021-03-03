@@ -1,4 +1,4 @@
-function [eta1,eta2,p_fp,p_fn,p_tp,p_tn,ctilde,cp,cn] = MultifidelityROC(N,p,s,rho,epsilon,s_approx,rho_approx,epsilon_approx)
+function [eta1,eta2,p_fp,p_fn,p_tp,p_tn,ctilde,cp,cn,rho_dist,rho_dist_approx] = MultifidelityROC(N,p,s,rho,epsilon,s_approx,rho_approx,epsilon_approx)
 %% Burn-in run to compute false/true positive/negative rates
 %
 % Inputs:
@@ -41,6 +41,8 @@ TN = 0;
 cp = 0;
 cn = 0;
 ctilde = 0;
+rho_dist = [];
+rho_dist_approx = [];
 for i = 1:N
     % generate trial from the prior
     theta_trial = p();
@@ -50,12 +52,14 @@ for i = 1:N
     ctilde = ctilde + toc;
     dist_approx = rho_approx(D_s_approx);
 
+    rho_dist_approx = [rho_dist_approx,dist_approx];
     % simulate exact model and time
     tic;
     D_s = s(theta_trial);
     ctemp = toc;
     dist = rho(D_s);
 
+    rho_dist = [rho_dist,dist];
      % compute ROC and expected compute times
     if dist_approx<epsilon_approx
         cp = cp + ctemp;

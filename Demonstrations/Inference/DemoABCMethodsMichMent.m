@@ -23,11 +23,13 @@ Y_obs = GenerateObservations(michment,k_true,X0,1,[4],t,0);
 rho = @(X_s) sqrt(sum((X_s(:) - Y_obs(:)).^2));
 
 % Simulation as a function of k only
-f = @(k) GenerateObservations(michment,k,X0,1,[4],t,2);
+s = @(k) GenerateObservations(michment,k,X0,1,[4],t,2);
 % prior support (uniform)
 kmax = [0.003;0.015;0.05];
 kmin = [eps;eps;eps];
 
+% functional of interest (i.e., computes mean of particular parameter)
+f = @(x) x(1,:);
 %% Set up ABC MLMC 
 % discrepancy threshold sequence
 epsilon = [40;20;10;5;2.5]; % TODO: vary as tuning param with L
@@ -37,19 +39,19 @@ supp0.u = kmax;
 p = @(l,u) unifrnd(l,u);
 % sequence of sample numbers
 N = [800;400;200;100;50]; % TODO: apply optimal choice
-N = ABCMLMCN(100,p,supp0,f,rho,epsilon,0.5)
+%N = ABCMLMCN(100,p,supp0,f,rho,epsilon,0.5)
 
 %% Run and time ABC MLMC
 fprintf('Running ABC MLMC...\n');
 tic;
 %[E_mlmc,V_mlmc,F_mlmc] = ABCMLMC(N,p,supp0,f,rho,epsilon)
-[E_mlmc,V_mlmc,F_mlmc] = ABCMLMC(N,p,supp0,f,rho,epsilon)
+[E_mlmc,V_mlmc,F_mlmc] = ABCMLMC(N,p,supp0,s,rho,epsilon,f);
 C_mlmc = toc;
 fprintf('ABC MLMC Completed in %f Sec\n',C_mlmc);
 
 %% Set up ABC Mulitfidelity
 tau = 2;
-f_approx = @(k) GenerateApproxObservations(michment,k,X0,1,[4],t,2,tau);
+s_approx = @(k) GenerateApproxObservations(michment,k,X0,1,[4],t,2,tau);
 epsilon = 2.5;
 p = @() unifrnd(kmin,kmax);
 %N = 20000;
@@ -58,14 +60,14 @@ p = @() unifrnd(kmin,kmax);
 %C_mfroc= toc;
 %fprintf('ABC Multifidelity optimisation in %f Sec\n',C_mfroc)
 % Prior sampler
-N = 200000;
+N = 20000;
 M = N/10;
 %% Run and Time ABC Multifidelity
-fprintf('Running ABC Multifidelity ...\n');
+fprintf('Running Adaptive ABC Multifidelity ...\n');
 tic;
-[E_mf,V_mf,ESS_mf] = ABCAdaptiveMultifidelity(N,M,p,f,rho,epsilon,f_approx,rho,epsilon,@(x)x(1,:));
+[E_mf,V_mf,ESS_mf] = ABCAdaptiveMultifidelity(N,M,p,s,rho,epsilon,s_approx,rho,epsilon,f);
 C_mf = toc;
-fprintf('ABC Multifidelity Completed in %f Sec\n',C_mf)
+fprintf('ABC Adaptive Multifidelity Completed in %f Sec\n',C_mf)
 
 %% Set up ABC Rejection
 % discrepancy threshold
@@ -78,9 +80,9 @@ N = 100;
 %% Run and time ABC Rejection
 fprintf('Running ABC Rejection...\n');
 tic;
-theta_rej = ABCRejectionSampler(N,p,f,rho,epsilon);
-E_rej = mean(theta_rej,2);
-V_rej = (1/(N-1))*(mean(theta_rej.^2,2) - E_rej.^2);
+theta_rej = ABCRejectionSampler(N,p,s,rho,epsilon);
+E_rej = mean(f(theta_rej));
+V_rej = (1/(N-1))*(mean(f(theta_rej).^2) - E_rej.^2);
 C_rej = toc;
 fprintf('ABC Rejection Completed in %f Sec\n',C_rej);
 
@@ -104,9 +106,9 @@ thin = 1000;
 tic;
 fprintf('Running ABC MCMC...\n');
 theta0 = ABCRejectionSampler(1,p,f,rho,epsilon);
-theta_mcmc = ABCMCMCSampler(T,p_pdf,K,K_pdf,f,rho,epsilon,theta0);
-E_mcmc = mean(theta_mcmc(:,burnin:thin:T),2);
-V_mcmc = (1/(N-1))*(mean(theta_mcmc(:,burnin:thin:T).^2,2) - E_mcmc.^2);
+theta_mcmc = ABCMCMCSampler(T,p_pdf,K,K_pdf,s,rho,epsilon,theta0);
+E_mcmc = mean(f(theta_mcmc(:,burnin:thin:T)));
+V_mcmc = (1/(N-1))*(mean(f(theta_mcmc(:,burnin:thin:T)).^2) - E_mcmc.^2);
 C_mcmc = toc;
 fprintf('ABC MCMC Completed in %f Sec\n',C_mcmc);
 
@@ -126,17 +128,18 @@ N = 100;
 %% Run and time ABC SMC
 fprintf('Running ABC SMC...\n');
 tic;
-[theta_smc,W] = ABCSMCSampler(N,p,p_pdf,K,K_pdf,f,rho,epsilon);
-E_smc = mean(theta_smc(:,:,end),2);
-V_smc = (1/(N-1))*(mean(theta_smc(:,:,end).^2,2) - E_smc.^2);
+[theta_smc,W] = ABCSMCSampler(N,p,p_pdf,K,K_pdf,s,rho,epsilon);
+E_smc = mean(f(theta_smc(:,:,end)),2);
+V_smc = (1/(N-1))*(mean(f(theta_smc(:,:,end)).^2,2) - E_smc.^2);
 C_smc = toc;
 fprintf('ABC SMC Completed in %f Sec\n',C_smc);
 
 %% collect results
-comp = [E_mlmc',V_mlmc',C_mlmc;
-        E_rej',V_rej',C_rej;
-        E_mcmc',V_mcmc',C_mcmc;
-        E_smc',V_smc',C_smc]
+comp = [E_mlmc,V_mlmc,C_mlmc;
+        E_mf,V_mf,C_mf;
+        E_rej,V_rej,C_rej;
+        E_mcmc,V_mcmc,C_mcmc;
+        E_smc,V_smc,C_smc]
 comp(:,4:6) = 1.95*sqrt(comp(:,4:6));
 
 %% plot Markov Chain transient behaviour

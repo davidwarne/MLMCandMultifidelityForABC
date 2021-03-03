@@ -1,16 +1,14 @@
-function [E,V,F]= ABCMLMC(N,p,supp0,f,rho,epsilon,h)
-%% Multilevel Monte Carlo Sampler for approximate Bayesian computaion to compute
-% the posterior mean
+function [N]= ABCMLMC(M,p,supp0,f,rho,epsilon,h)
+%% Estimate optimal sample size sequence for MLMC based ABC
 %
 % Inputs:
-%    N - A sequence of sample sizes if length(N) == 1, then N is the number of trial
-%        samples at each level determine optimal N
+%    M - the number of trial samples at each level determine optimal N
 %    p - prior distribution sampler, 
 %    supp0 - initial support region for sampling
 %    f - function that generates simulated data give a parameters set
 %    rho - discrepancy metric, treated as a function of simulated data only
 %    epsilon - a sequence of discrepancy acceptance thresholds
-%    h - if length(N) == 1, then h is the target RMSE.
+%    h - target root meansquare error
 %
 % Outputs:
 %    E - Joint posterior mean estimate
@@ -23,17 +21,18 @@ function [E,V,F]= ABCMLMC(N,p,supp0,f,rho,epsilon,h)
 %         Queensland University of Technology
 
 
-% determine trial N
-if length(N) == 1
-    N = ABCMLMCN(N,p,supp0,f,rho,epsiloni,h)
-end
-
 % initialise
 L = length(epsilon);
+
 theta = cell(L,1); 
 supp = supp0;
+
+
 C = 1e16;
 k = length(supp.l);
+v = zeros(k,L);
+c = zeros(1,L);
+N = zeros(k,L);
 s = [];
 for j=1:k
     s = [s;linspace(supp.l(j),supp.u(j),100)];
@@ -41,11 +40,14 @@ end
 Fl = cell(k,1);
 F = cell(k,1);
 Finv = cell(k,1);
+
 for l=1:L
+    l
     %  ABC rejection step
-    pl = @() p(supp.l,supp.u);
+    pl = @() p(supp0.l,supp0.u);
     supp_prev = supp;
-    theta{l} = ABCRejectionSampler(N(l),pl,f,rho,epsilon(l));
+    tic;
+    theta{l} = ABCRejectionSampler(M,pl,f,rho,epsilon(l));
     % compute marginal eCDFs and support
     for j=1:k
         Fl{j} = @(t) ppval(interp1(s(j,:),ksdensity(theta{l}(j,:),s(j,:), ...
@@ -62,7 +64,8 @@ for l=1:L
            Finv{j} = @(u) ppval(interp1(F{j}(s(j,I)),s(j,I),'pchip','pp'),u); 
         end
         E = mean(theta{l},2);
-        V = (1/(N(l)-1))*(mean(theta{l}.^2,2) - E.^2); 
+        V = (1/(M-1))*(mean(theta{l}.^2,2) - E.^2); 
+        v(:,l) = V;
     else
         % generate approximate coupled l-1 samples
         theta_lm1 = zeros(size(theta{l}));
@@ -92,6 +95,12 @@ for l=1:L
         % update estimators
         Pl = mean(theta{l} - theta_lm1,2);
         E = E + Pl;
-        V = V +  (1/(N(l)-1))*(mean((theta{l} - theta_lm1).^2,2) - Pl.^2);
+        v(:,l) = (1/(M-1))*(mean((theta{l} - theta_lm1).^2,2) - Pl.^2);
+        V = V + v(:,l);
     end
+    c(l) = toc;
+end
+
+for l=1:L
+    N(:,l) = sqrt(v(:,l)/c(l))*sum((v.*repmat(c,[k,1])).^(1/2),2)/(h^2);
 end

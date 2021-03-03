@@ -88,7 +88,7 @@ for i = 1:N
         pfpf = (rho_n/rho_k)*sum((1-w_exact(I_k)).*w_approx(I_k).*(f(theta(:,I_k))-mu).^2)/k;
         pfnf = ((1-rho_n)/(1-rho_k))*sum(w_exact(I_k).*(1-w_approx(I_k)).*(f(theta(:,I_k))-mu).^2)/k;
         % estimate optimal eta1 and eta2 (using f-depenent efficiency measure)
-        R_0 = ptpf - pfpf
+        R_0 = ptpf - pfpf;
         if R_0 > 0
             R_p = pfpf/(cp/Ec);
             R_n = pfnf/(cn/Ec);
@@ -110,6 +110,8 @@ for i = 1:N
             % to avoid reducing to ABC rejection on the approximate model only.
             eta1 = max(eta1,1e-2);
             eta2 = max(eta2,1e-2);
+        else
+            warning('The false positive rate exceeds the true positive rate (i.e., R_0 < 0). This indicates the approximate model is too inaccuate to obtain any performance gain.');
         end
     end
 end

@@ -1,7 +1,5 @@
-function [FP, FN, TP, TN] = MultifidelityROC(N,p,s,rho,epsilon,s_approx,rho_approx,epsilon_approx)
-
+function [eta1,eta2,p_fp,p_fn,p_tp,p_tn,ctilde,cp,cn] = MultifidelityROC(N,p,s,rho,epsilon,s_approx,rho_approx,epsilon_approx)
 %% Burn-in run to compute false/true positive/negative rates
-% TODO - record simulation times
 %
 % Inputs:
 %    N - Number of samples
@@ -14,10 +12,15 @@ function [FP, FN, TP, TN] = MultifidelityROC(N,p,s,rho,epsilon,s_approx,rho_appr
 %    epsilon_approx - approximate discrepancy treshold
 %
 % Outputs:
-%    FP - proportion with (rho_approx < epsilon_approx) & (rho > epsilon)
-%    FN - proportion with (rho_approx > epsilon_approx) & (rho < epsilon)
-%    TP - proportion with (rho_approx < epsilon_approx) & (rho < epsilon)
-%    TN - proportion with (rho_approx > epsilon_approx) & (rho > epsilon)
+%    eta1 - optimal continuation probability for rho_approx < epsilon_approx
+%    eta2 - optimal continuation probability for rho_approx > epsilon_approx
+%    p_fp - proportion with (rho_approx < epsilon_approx) & (rho > epsilon)
+%    p_fn - proportion with (rho_approx > epsilon_approx) & (rho < epsilon)
+%    p_tp - proportion with (rho_approx < epsilon_approx) & (rho < epsilon)
+%    p_tn - proportion with (rho_approx > epsilon_approx) & (rho > epsilon)
+%    ctilde - expected approximate simulation cost
+%    cp - expected exact simulation cost for continuation of positive test
+%    cn - expected exact simulation cost for continuation of negative test
 %
 % 
 % Authors:
@@ -31,31 +34,38 @@ function [FP, FN, TP, TN] = MultifidelityROC(N,p,s,rho,epsilon,s_approx,rho_appr
 %   [4] ARC Centre of Excellence for Mathematical and Statistical Frontiers
 
 % initialise
-% theta = [];
 FP = 0;
 FN = 0;
 TP = 0;
 TN = 0;
-
+cp = 0;
+cn = 0;
+ctilde = 0;
 for i = 1:N
     % generate trial from the prior
     theta_trial = p();
-    % simulate approximate data using these parameters
+    % simulate approximate data using these parameters and time
+    tic;
     D_s_approx = s_approx(theta_trial);
+    ctilde = ctilde + toc;
     dist_approx = rho_approx(D_s_approx);
 
-    % simulate exact model
+    % simulate exact model and time
+    tic;
     D_s = s(theta_trial);
+    ctemp = toc;
     dist = rho(D_s);
-%    theta = [theta,theta_trial];
 
+     % compute ROC and expected compute times
     if dist_approx<epsilon_approx
+        cp = cp + ctemp;
         if dist<epsilon
             TP = TP+1;
         else
             FP = FP+1;
         end
     else
+        cn = cn + ctemp;
         if dist<epsilon
             FN = FN+1;
         else
@@ -64,9 +74,21 @@ for i = 1:N
     end
 end
 
-FP = FP/N;
-FN = FN/N;
-TP = TP/N;
-TN = TN/N;
+% ROC estimates 
+p_fp = FP/N;
+p_fn = FN/N;
+p_tp = TP/N;
+p_tn = TN/N;
 
+% compuational cost estimates
+ctilde = ctilde/N;
+cp = (cp/(TP+FP))*(p_tp + p_fp);
+cn = (cn/(TN+FN))*(p_tn + p_fn);
+
+% opitmal continuation probabilities (Lemma 4.2 in Prescott and Baker (2020))
+R_p = p_fp/(cp/ctilde);
+R_n = p_fn/(cn/ctilde);
+R_0 = p_tp - p_fp;
+eta1 = sqrt(R_p/R_0);
+eta2 = sqrt(R_n/R_0);
 end

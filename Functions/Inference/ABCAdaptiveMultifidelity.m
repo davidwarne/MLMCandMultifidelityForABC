@@ -1,5 +1,7 @@
 function [E,V,ESS,eta1,eta2] = ABCAdaptiveMultifidelity(N,M,p,s,rho,epsilon,s_approx,rho_approx,epsilon_approx,f)
-%% Adaptive early accept/reject multifidelity for approximate Bayesian computaion
+%% Adaptive early accept/reject multifidelity for approximate Bayesian computation
+% The function adaptively updates the optimal continuation probabililties based on
+% increasingly accurate estimates of ROC properties.
 %
 % Inputs:
 %    N - Number of samples
@@ -17,6 +19,7 @@ function [E,V,ESS,eta1,eta2] = ABCAdaptiveMultifidelity(N,M,p,s,rho,epsilon,s_ap
 %    E - Monte Carlo estimate of E[f(theta)]
 %    V - Estimator variance (based on delta method approximation)
 %    ESS - Effective Sample Size
+%    eta1, eta2 - final values for optimal continuation probabilities
 %
 % Authors:
 %   Thomas P. Prescott[1] (prescott@maths.ox.ac.uk)
@@ -98,12 +101,15 @@ for i = 1:N
                 % if phi(1,eta2) <= phi(eta1,1)
                 if  (R_0 + pfpf +pfnf/eta2b)*(Ec + cp + eta2b*cn) <= (R_0 + pfpf/eta1b +pfnf)*(Ec + eta1b*cp + cn) 
                     eta1 = 1;
-                    etat2 = eta2b;
+                    eta2 = eta2b;
                 else
                     eta1 = eta1b;
                     eta2 = 1;
                 end
             end
+            % to avoid reducing to ABC rejection on the approximate model only.
+            eta1 = max(eta1,1e-2);
+            eta2 = max(eta2,1e-2);
         end
     end
 end

@@ -38,9 +38,11 @@ supp0.l = kmin;
 supp0.u = kmax;
 p = @(l,u) unifrnd(l,u);
 % sequence of sample numbers
-N = [800;400;200;100;50]; % TODO: apply optimal choice
-%N = ABCMLMCN(100,p,supp0,f,rho,epsilon,0.5)
-
+%N = [800;400;200;100;50]; % TODO: apply optimal choice
+% h = 0.01; % target RMSE 
+%N = ABCMLMCN(100,p,supp0,s,rho,epsilon,f,0.5)
+% optimal N
+N = [1339;98;53;32;5]
 %% Run and time ABC MLMC
 fprintf('Running ABC MLMC...\n');
 tic;

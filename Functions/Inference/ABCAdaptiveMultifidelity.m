@@ -47,9 +47,9 @@ for i = 1:N
     % generate trial from the prior
     theta_trial = p();
     % simulate approximate data using these parameters
-    tic;
+    start_t = toc;
     D_s_approx = s_approx(theta_trial);
-    c_approx(i) = toc;
+    c_approx(i) = toc - start_t;
     theta = [theta,theta_trial];
     % compute early accept/reject weight
     w_approx(i) = (rho_approx(D_s_approx) <= epsilon_approx);
@@ -59,9 +59,9 @@ for i = 1:N
     % continue with probability eta
     if unifrnd(0,1) < eta
         % simulate exact model
-        tic;
+        start_t = toc;
         D_s = s(theta_trial);
-        c_exact(i) = toc;
+        c_exact(i) = toc - start_t;
         % update weights
         w_exact(i) = (rho(D_s) <= epsilon);
         w(i) = w(i) + (w_exact(i) - w(i))/eta;

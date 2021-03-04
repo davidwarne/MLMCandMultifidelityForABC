@@ -100,14 +100,14 @@ Sigma = diag((0.05*(kmax-kmin)).^2);
 K = @(k) mvnrnd(k,Sigma)';
 K_pdf = @(k_n,k_p) mvnpdf(k_n,k_p,Sigma);
 % number of steps in the Markov Chain
-T = 500000;
-burnin = 100000;
-thin = 1000;
+T = 5000;
+burnin = 1000;
+thin = 1;%000;
 
 %% Run and ABC MCMC
 tic;
 fprintf('Running ABC MCMC...\n');
-theta0 = ABCRejectionSampler(1,p,f,rho,epsilon);
+theta0 = ABCRejectionSampler(1,p,s,rho,epsilon);
 theta_mcmc = ABCMCMCSampler(T,p_pdf,K,K_pdf,s,rho,epsilon,theta0);
 E_mcmc = mean(f(theta_mcmc(:,burnin:thin:T)));
 V_mcmc = (1/(N-1))*(mean(f(theta_mcmc(:,burnin:thin:T)).^2) - E_mcmc.^2);
@@ -142,7 +142,7 @@ comp = [E_mlmc,V_mlmc,C_mlmc;
         E_rej,V_rej,C_rej;
         E_mcmc,V_mcmc,C_mcmc;
         E_smc,V_smc,C_smc]
-comp(:,4:6) = 1.95*sqrt(comp(:,4:6));
+comp(:,2) = 1.95*sqrt(comp(:,2));
 
 %% plot Markov Chain transient behaviour
 for i=1:3

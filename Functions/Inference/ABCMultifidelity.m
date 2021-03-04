@@ -37,7 +37,7 @@ for i = 1:N
     % generate trial from the prior
     theta_trial = p();
     % simulate approximate data using these parameters
-    D_s_approx = s_approx(theta_trial);
+    [D_s_approx, couple_arg_1, couple_arg_2, couple_arg_3] = s_approx(theta_trial);
     % compute early accept/reject weight
     w(i) = (rho_approx(D_s_approx) <= epsilon_approx);
     % compute continuation probility
@@ -45,7 +45,7 @@ for i = 1:N
     % continue with probability eta
     if unifrnd(0,1) < eta
         % simulate exact model
-        D_s = s(theta_trial);
+        D_s = s(theta_trial, couple_arg_1, couple_arg_2, couple_arg_3);
         % update weights
         w(i) = w(i) + ((rho(D_s) <= epsilon) - w(i))/eta;
     end

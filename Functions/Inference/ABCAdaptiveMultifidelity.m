@@ -34,6 +34,7 @@ function [E,V,ESS,eta1,eta2] = ABCAdaptiveMultifidelity(N,M,p,s,rho,epsilon,s_ap
 % initialise
 eta1 = 1;
 eta2 = 1;
+R_0 = 0;
 I_n = [];
 I_k = [];
 theta = [];
@@ -43,12 +44,22 @@ c_approx = [];
 w_exact = [];
 c_exact = [];
 
+wb = waitbar(0, sprintf('eta1 = %0.3f ; eta2 = %0.3f ; R_0 = %0.3e', eta1, eta2, R_0),...
+    'CreateCancelBtn', 'setappdata(gcbf,''cancelling'',1)');
+setappdata(wb, 'cancelling', 0);
+update_factor = ceil(N/1000);
+
 for i = 1:N
+    % Check for clicked Cancel button
+    if getappdata(wb,'cancelling')
+        break
+    end
+
     % generate trial from the prior
     theta_trial = p();
     % simulate approximate data using these parameters
     start_t = toc;
-    D_s_approx = s_approx(theta_trial);
+    [D_s_approx, couple_arg_1, couple_arg_2, couple_arg_3] = s_approx(theta_trial);
     c_approx(i) = toc - start_t;
     theta = [theta,theta_trial];
     % compute early accept/reject weight
@@ -60,7 +71,7 @@ for i = 1:N
     if unifrnd(0,1) < eta
         % simulate exact model
         start_t = toc;
-        D_s = s(theta_trial);
+        D_s = s(theta_trial, couple_arg_1, couple_arg_2, couple_arg_3);
         c_exact(i) = toc - start_t;
         % update weights
         w_exact(i) = (rho(D_s) <= epsilon);
@@ -111,10 +122,17 @@ for i = 1:N
             eta1 = max(eta1,1e-2);
             eta2 = max(eta2,1e-2);
         else
-            warning('The false positive rate exceeds the true positive rate (i.e., R_0 < 0). This indicates the approximate model is too inaccuate to obtain any performance gain.');
+            % warning('The false positive rate exceeds the true positive rate (i.e., R_0 < 0). This indicates the approximate model is too inaccuate to obtain any performance gain.');
+            eta1 = 1;
+            eta2 = 1;
         end
     end
+    
+    if rem(i,update_factor)==0
+        waitbar(i/N, wb, sprintf('eta1 = %0.3f ; eta2 = %0.3f ; R_0 = %0.3e', eta1, eta2, R_0));
+    end
 end
+
 F = f(theta);
 % compute Multifiedlity estimator
 E = sum(w.*F)/(sum(w));
@@ -126,3 +144,4 @@ V = (var(w)*(mu_wf/mu_w)^2 + var(w.*F) - 2*c(1,2)*(mu_wf/mu_w))/(N*mu_w^2);
 % effective sample size (proportional to ESS \propto 1/V)
 ESS = (sum(w)^2)/sum(w.*w);
 
+delete(wb)

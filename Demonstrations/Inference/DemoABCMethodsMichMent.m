@@ -54,6 +54,7 @@ fprintf('ABC MLMC Completed in %f Sec\n',C_mlmc);
 %% Set up ABC Mulitfidelity
 tau = 2;
 s_approx = @(k) GenerateApproxObservations(michment,k,X0,1,[4],t,2,tau);
+s_cpl = @(k,c1,c2,c3) GenerateCoupledObservations(michment,k,X0,1,[4],t,2,c1,c2,c3);
 epsilon = 2.5;
 p = @() unifrnd(kmin,kmax);
 %N = 20000;
@@ -67,7 +68,7 @@ M = N/10;
 %% Run and Time ABC Multifidelity
 fprintf('Running Adaptive ABC Multifidelity ...\n');
 tic;
-[E_mf,V_mf,ESS_mf] = ABCAdaptiveMultifidelity(N,M,p,s,rho,epsilon,s_approx,rho,epsilon,f);
+[E_mf,V_mf,ESS_mf] = ABCAdaptiveMultifidelity(N,M,p,s_cpl,rho,epsilon,s_approx,rho,epsilon,f);
 C_mf = toc;
 fprintf('ABC Adaptive Multifidelity Completed in %f Sec\n',C_mf)
 

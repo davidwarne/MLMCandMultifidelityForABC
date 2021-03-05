@@ -48,10 +48,6 @@ c_exact = [];
 update_factor = ceil(N/1000);
 
 for i = 1:N
-    % Check for clicked Cancel button
-    if getappdata(wb,'cancelling')
-        break
-    end
 
     % generate trial from the prior
     theta_trial = p();

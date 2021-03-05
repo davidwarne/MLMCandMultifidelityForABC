@@ -44,9 +44,7 @@ c_approx = [];
 w_exact = [];
 c_exact = [];
 
-wb = waitbar(0, sprintf('eta1 = %0.3f ; eta2 = %0.3f ; R_0 = %0.3e', eta1, eta2, R_0),...
-    'CreateCancelBtn', 'setappdata(gcbf,''cancelling'',1)');
-setappdata(wb, 'cancelling', 0);
+
 update_factor = ceil(N/1000);
 
 for i = 1:N
@@ -122,14 +120,13 @@ for i = 1:N
             eta1 = max(eta1,1e-2);
             eta2 = max(eta2,1e-2);
         else
-            % warning('The false positive rate exceeds the true positive rate (i.e., R_0 < 0). This indicates the approximate model is too inaccuate to obtain any performance gain.');
             eta1 = 1;
             eta2 = 1;
         end
     end
     
     if rem(i,update_factor)==0
-        waitbar(i/N, wb, sprintf('eta1 = %0.3f ; eta2 = %0.3f ; R_0 = %0.3e', eta1, eta2, R_0));
+        fprintf('%f\% complete, eta1 = %0.3f ; eta2 = %0.3f ; R_0 = %0.3e', eta1, eta2, R_0);
     end
 end
 

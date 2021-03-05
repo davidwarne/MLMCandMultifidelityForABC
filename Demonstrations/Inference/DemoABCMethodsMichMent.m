@@ -63,7 +63,7 @@ p = @() unifrnd(kmin,kmax);
 %C_mfroc= toc;
 %fprintf('ABC Multifidelity optimisation in %f Sec\n',C_mfroc)
 % Prior sampler
-N = 20000;
+N = 200000;
 M = N/10;
 %% Run and Time ABC Multifidelity
 fprintf('Running Adaptive ABC Multifidelity ...\n');
@@ -101,7 +101,7 @@ Sigma = diag((0.05*(kmax-kmin)).^2);
 K = @(k) mvnrnd(k,Sigma)';
 K_pdf = @(k_n,k_p) mvnpdf(k_n,k_p,Sigma);
 % number of steps in the Markov Chain
-T = 5000;
+T = 500000;
 burnin = 1000;
 thin = 1;%000;
 

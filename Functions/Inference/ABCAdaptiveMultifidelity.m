@@ -121,9 +121,9 @@ for i = 1:N
         end
     end
     
-    if rem(i,update_factor)==0
-        fprintf('%f\% complete, eta1 = %0.3f ; eta2 = %0.3f ; R_0 = %0.3e', eta1, eta2, R_0);
-    end
+    %if rem(i,update_factor)==0
+    %    fprintf('%f\\% complete, eta1 = %0.3f ; eta2 = %0.3f ; R_0 = %0.3e', eta1, eta2, R_0);
+    %end
 end
 
 F = f(theta);
@@ -137,4 +137,3 @@ V = (var(w)*(mu_wf/mu_w)^2 + var(w.*F) - 2*c(1,2)*(mu_wf/mu_w))/(N*mu_w^2);
 % effective sample size (proportional to ESS \propto 1/V)
 ESS = (sum(w)^2)/sum(w.*w);
 
-delete(wb)

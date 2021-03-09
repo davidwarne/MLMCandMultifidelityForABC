@@ -62,7 +62,7 @@ alpha = k(2);
 K = k(3);
 n = k(4);
 beta = k(5);
-gamma = (6);
+gamma = k(6);
 
 N = length(X)/2;
 

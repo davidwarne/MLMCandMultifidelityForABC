@@ -35,34 +35,38 @@ function [E,V,ESS,eta1,eta2] = ABCAdaptiveMultifidelity(N,M,p,s,rho,epsilon,s_ap
 eta1 = 1;
 eta2 = 1;
 R_0 = 0;
-I_n = [];
-I_k = [];
-theta = [];
-w = [];
-w_approx = [];
-c_approx = [];
-w_exact = [];
-c_exact = [];
 
+dim_theta = length(p());
+theta = zeros(dim_theta, M);
 
+w = zeros(1,M);
+
+I_k = false(1,M);
+w_approx = zeros(1,M);
+c_approx = zeros(1,M);
+w_exact = zeros(1,M);
+c_exact = zeros(1,M);
+
+U = unifrnd(0,1,1,N);
 update_factor = ceil(N/1000);
 
+k = 0;
+burning_in = true;
 for i = 1:N
-
     % generate trial from the prior
     theta_trial = p();
     % simulate approximate data using these parameters
     start_t = toc;
     [D_s_approx, couple_arg_1, couple_arg_2, couple_arg_3] = s_approx(theta_trial);
     c_approx(i) = toc - start_t;
-    theta = [theta,theta_trial];
+    theta(:,i) = theta_trial;
     % compute early accept/reject weight
     w_approx(i) = (rho_approx(D_s_approx) <= epsilon_approx);
     w(i) = w_approx(i);
     % compute continuation probility
     eta =  eta1*w(i) + eta2*(1- w_approx(i));
     % continue with probability eta
-    if unifrnd(0,1) < eta
+    if U(i) < eta
         % simulate exact model
         start_t = toc;
         D_s = s(theta_trial, couple_arg_1, couple_arg_2, couple_arg_3);
@@ -70,28 +74,32 @@ for i = 1:N
         % update weights
         w_exact(i) = (rho(D_s) <= epsilon);
         w(i) = w(i) + (w_exact(i) - w(i))/eta;
-        I_k = [I_k, i];
+        I_k(i) = true;
+        if burning_in
+            M = M-1;
+            if M == 0
+                burning_in = false;
+            end
+        end
     end
-    I_n = [I_n,i];
-    n = length(I_n);
-    k = length(I_k);
-    if M <= k
+    
+    if ~burning_in
         % recalculate values in 6.4--6.6
-        rho_n = sum(w_approx(I_n))/n;
-        rho_k = sum(w_approx(I_k))/k;
+        rho_n = mean(w_approx(1:i));
+        rho_k = mean(w_approx(I_k));
         % 6.4
-        Ec = sum(c_approx(I_n))/n;
-        cp = (rho_n/rho_k)*sum(c_exact(I_k).*w_approx(I_k))/k;
-        cn = ((1-rho_n)/(1-rho_k))*sum(c_exact(I_k).*(1-w_approx(I_k)))/k;
+        Ec = mean(c_approx(1:i));
+        cp = (rho_n/rho_k)*mean(c_exact(I_k).*w_approx(I_k));
+        cn = ((1-rho_n)/(1-rho_k))*mean(c_exact(I_k).*(1-w_approx(I_k)));
         % 6.5 
-        ptp = (rho_n/rho_k)*sum(w_exact(I_k).*w_approx(I_k))/k;
-        pfp = (rho_n/rho_k)*sum((1-w_exact(I_k)).*w_approx(I_k))/k;
-        pfn = ((1-rho_n)/(1-rho_k))*sum(w_exact(I_k).*(1-w_approx(I_k)))/k;
+        ptp = (rho_n/rho_k)*mean(w_exact(I_k).*w_approx(I_k));
+        pfp = (rho_n/rho_k)*mean((1-w_exact(I_k)).*w_approx(I_k));
+        pfn = ((1-rho_n)/(1-rho_k))*mean(w_exact(I_k).*(1-w_approx(I_k)));
         % 6.6
-        mu = sum(w(I_n).*f(theta(:,I_n)))/sum(w(I_n)) ;
-        ptpf = (rho_n/rho_k)*sum(w_exact(I_k).*w_approx(I_k).*(f(theta(:,I_k))-mu).^2)/k;
-        pfpf = (rho_n/rho_k)*sum((1-w_exact(I_k)).*w_approx(I_k).*(f(theta(:,I_k))-mu).^2)/k;
-        pfnf = ((1-rho_n)/(1-rho_k))*sum(w_exact(I_k).*(1-w_approx(I_k)).*(f(theta(:,I_k))-mu).^2)/k;
+        mu = sum(w(1:i).*f(theta(:,1:i)))/sum(w(1:i)) ;
+        ptpf = (rho_n/rho_k)*mean(w_exact(I_k).*w_approx(I_k).*(f(theta(:,I_k))-mu).^2);
+        pfpf = (rho_n/rho_k)*mean((1-w_exact(I_k)).*w_approx(I_k).*(f(theta(:,I_k))-mu).^2);
+        pfnf = ((1-rho_n)/(1-rho_k))*mean(w_exact(I_k).*(1-w_approx(I_k)).*(f(theta(:,I_k))-mu).^2);
         % estimate optimal eta1 and eta2 (using f-depenent efficiency measure)
         R_0 = ptpf - pfpf;
         if R_0 > 0
@@ -121,9 +129,9 @@ for i = 1:N
         end
     end
     
-    %if rem(i,update_factor)==0
-    %    fprintf('%f\\% complete, eta1 = %0.3f ; eta2 = %0.3f ; R_0 = %0.3e', eta1, eta2, R_0);
-    %end
+    if rem(i,update_factor)==0
+        fprintf('%0.3f complete, eta1 = %0.3f ; eta2 = %0.3f ; R_0 = %0.3e \n', i/N, eta1, eta2, R_0);
+    end
 end
 
 F = f(theta);

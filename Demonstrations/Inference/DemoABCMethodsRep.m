@@ -11,15 +11,15 @@
 rng(513,'twister');
 
 % generate data from discrete sampling of a single realisation, 
-% no observation error
-k_true = [1;1000;50;2;5;1]; 
-X0 = [0;2;0;1;0;3];
-t = [0;2.5;5;7.5;10;12.5;15;17.5;20;]
+% no observation error (set up based on Prescott and Baker 2020)
+k_true = [1;1000;20;2;5;1]; % [alpha0,alpha,K,n,beta,gamma] 
+X0 = [0;40;0;20;0;60];
+t = [0;1;2;3;4;5;6;7;8;9;10];
 [rep] = Repressilator(k_true,X0([1,3,5]),X0([2,4,6]));
 
 % assume only proteins are observable and additive error of sigma = 10
 Obs_I = [2,4,6];
-sig = 10;
+sig = 1;
 Y_obs = GenerateObservations(rep,k_true,X0,1,Obs_I,t,sig);
 
 % discrepancy function as a function of simulated data
@@ -27,26 +27,52 @@ rho = @(X_s) sqrt(sum((X_s(:) - Y_obs(:)).^2));
 
 % Simulation as a function of k only
 
-s = @(k) GenerateObservations(rep,k,X0,1,Obs_I,t,sig);
+s = @(k) GenerateObservations(rep,[k_true(1);k_true(2);k(1);k(2);k_true(5);k_true(6)],X0,1,Obs_I,t,sig);
 % prior support (uniform)
-kmax = [10;2500;50;10;20;1];
-kmin = [eps;500;10;1;1;0.5];
+kmax = [4;30];
+kmin = [1;10];
 
 % functional of interest (i.e., computes mean of particular parameter)
 f = @(x) x(1,:);
+
+%% Set up ABC Mulitfidelity
+tau = 0.1;
+s_approx = @(k) GenerateApproxObservations(rep,[k_true(1);k_true(2);k(1);k(2);k_true(5);k_true(6)],X0,1,Obs_I,t,sig,tau);
+s_cpl = @(k,c1,c2,c3) GenerateCoupledObservations(rep,[k_true(1);k_true(2);k(1);k(2);k_true(5);k_true(6)],X0,1,Obs_I,t,sig,c1,c2,c3);
+epsilon = 50;
+p = @() unifrnd(kmin,kmax);
+%N = 20000;
+%tic;
+%[eta1,eta2,p_fp,p_fn,p_tp,p_tn,ctilde,cp,cn,rho_dist,rho_dist_approx] = MultifidelityROC(N,p,f,rho,5,f_approx,rho,5);
+%C_mfroc= toc;
+%fprintf('ABC Multifidelity optimisation in %f Sec\n',C_mfroc)
+% Prior sampler
+N = 10000;
+M = N/10;
+%% Run and Time ABC Multifidelity
+fprintf('Running Adaptive ABC Multifidelity ...\n');
+tic;
+[E_mf,V_mf,ESS_mf] = ABCAdaptiveMultifidelity(N,M,p,s_cpl,rho,epsilon,s_approx,rho,epsilon,f);
+C_mf = toc;
+fprintf('ABC Adaptive Multifidelity Completed in %f Sec\n',C_mf)
+
 %% Set up ABC MLMC 
 % discrepancy threshold sequence
-epsilon = [40;20;10;5;2.5]; % TODO: vary as tuning param with L
+L = 5; m = 2;
+epsilon = zeros(L,1);
+epsilon(L) = 50
+for l=(L-1):-1:1
+    epsilon(l) = epsilon(l+1)*m;
+end
 % create uniform joint prior
 supp0.l = kmin;
 supp0.u = kmax;
 p = @(l,u) unifrnd(l,u);
 % sequence of sample numbers
 %N = [800;400;200;100;50]; % TODO: apply optimal choice
-% h = 0.01; % target RMSE 
-%N = ABCMLMCN(100,p,supp0,s,rho,epsilon,f,0.5)
+ h = sqrt(V_mf); % target RMSE 
+N = ABCMLMCN(100,p,supp0,s,rho,epsilon,f,h)
 % optimal N
-N = [1339;98;53;32;5]
 %% Run and time ABC MLMC
 fprintf('Running ABC MLMC...\n');
 tic;
@@ -55,26 +81,6 @@ tic;
 C_mlmc = toc;
 fprintf('ABC MLMC Completed in %f Sec\n',C_mlmc);
 
-%% Set up ABC Mulitfidelity
-tau = 2;
-s_approx = @(k) GenerateApproxObservations(rep,k,X0,1,Obs_I,t,sig);
-s_cpl = @(k,c1,c2,c3) GenerateCoupledObservations(rep,k,X0,1,Obs_I,t,sig,c1,c2,c3);
-epsilon = 2.5;
-p = @() unifrnd(kmin,kmax);
-%N = 20000;
-%tic;
-%[eta1,eta2,p_fp,p_fn,p_tp,p_tn,ctilde,cp,cn,rho_dist,rho_dist_approx] = MultifidelityROC(N,p,f,rho,5,f_approx,rho,5);
-%C_mfroc= toc;
-%fprintf('ABC Multifidelity optimisation in %f Sec\n',C_mfroc)
-% Prior sampler
-N = 200000;
-M = N/10;
-%% Run and Time ABC Multifidelity
-fprintf('Running Adaptive ABC Multifidelity ...\n');
-tic;
-[E_mf,V_mf,ESS_mf] = ABCAdaptiveMultifidelity(N,M,p,s_cpl,rho,epsilon,s_approx,rho,epsilon,f);
-C_mf = toc;
-fprintf('ABC Adaptive Multifidelity Completed in %f Sec\n',C_mf)
 
 %% Set up ABC Rejection
 % discrepancy threshold
@@ -88,7 +94,7 @@ N = 100;
 fprintf('Running ABC Rejection...\n');
 tic;
 %theta_rej = ABCRejectionSampler(N,p,s,rho,epsilon);
-[theta_rej,r] = ABCRejectionSamplerQuant(N,p,s,rho,0.1);
+[theta_rej,r] = ABCRejectionSamplerQuant(N,p,s,rho,0.05);
 
 E_rej = mean(f(theta_rej));
 V_rej = (1/(N-1))*(mean(f(theta_rej).^2) - E_rej.^2);

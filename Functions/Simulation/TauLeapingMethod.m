@@ -38,6 +38,7 @@ end
 
 for i=1:Nt
     % compute propensities
+    Z(Z(:,i) < 0,i) = 0;
     a = bcrn.a(Z(:,i),bcrn.k); a(a < 0 ) = 0;
     % generate poisson variates
     Y = poissrnd(a*tau);

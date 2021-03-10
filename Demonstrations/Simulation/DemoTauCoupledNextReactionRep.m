@@ -10,18 +10,18 @@
 tau = 0.1
 rng(502,'twister');
 h = figure;
-% Build the repressilator  model
+% Build the repressilator  modelX0 = [0;40;0;20;0;60];
 %[michment] = MichaelisMenten([0.001;0.005;0.01],100,100);
-rep = Repressilator([1;1000;50;2;5;1],[0;0;0],[2;1;3]);
+rep = Repressilator([1;1000;52;2;5;1],[0;0;0],[40;20;60]);
 % simulate
 tic;
-[X_tau, t_tau, D, P] = TauLeapingMethod(rep,25,tau);
+[X_tau, t_tau, D, P] = TauLeapingMethod(rep,10,tau);
 toc;
 tic;
-[X_ind, t_ind] = GillespieDirectMethod(rep,25);
+[X_ind, t_ind] = GillespieDirectMethod(rep,10);
 toc;
 tic;
-[X_cpl, t_cpl] = CoupledNextReactionMethod(rep,25,D,P);
+[X_cpl, t_cpl] = CoupledNextReactionMethod(rep,10,D,P);
 toc;
 
 % Plot

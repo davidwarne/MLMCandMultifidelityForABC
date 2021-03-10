@@ -16,10 +16,15 @@ function [X,t] = CoupledNextReactionMethod(bcrn,T,D_obs,P_obs)
 %    X    -  time series of copy number vectors
 %    t    -  vector of reaction times
 %
-% Author:
-%   David J. Warne (david.warne@qut.edu.au)
-%         School of Mathematical Sciences
-%         Queensland University of Technology
+% Authors:
+%   Thomas P. Prescott[1] (prescott@maths.ox.ac.uk)
+%   David J. Warne[2,3,4] (david.warne@qut.edu.au)
+%   
+% Affiliations:
+%   [1] Mathematical Institute, University of Oxford, UK
+%   [2] School of Mathematical Sciences, Queensland University of Technology, Autralia
+%   [3] Centre for Data Science, Queensland University of Technology, Autralia
+%   [4] ARC Centre of Excellence for Mathematical and Statistical Frontiers
 
 
 % block size (reallocate a new block every B updates)

@@ -30,8 +30,8 @@ rho = @(X_s) sqrt(sum((X_s(:) - Y_obs(:)).^2));
 
 s = @(k) GenerateObservations(rep,[k_true(1:2);k;k_true(5:6)],X0,1,Obs_I,t,sig);
 % prior support (uniform)
-kmax = [4;30];
-kmin = [1;10];
+kmax = [30;4];
+kmin = [10;1];
 
 % functional of interest (i.e., computes mean of particular parameter)
 f = @(x) x(1,:);
@@ -40,7 +40,7 @@ f = @(x) x(1,:);
 %% Set up ABC MLMC 
 epsilon = zeros(L,1);
 epsilon(1) = 1600;
-epsilon(L) = 50;
+epsilon(L) = 200;
 % determine scale factor
 m = exp(log(epsilon(1)/epsilon(L))/(L-1));
 for l=(L-1):-1:2
@@ -53,7 +53,7 @@ p = @(l,u) unifrnd(l,u);
 tic;
 % sequence of sample numbers
 %N = [800;400;200;100;50]; % TODO: apply optimal choice
-h = 1; % target RMSE 
+h = 0.04n   ; % target RMSE 
 N = ABCMLMCN(100,p,supp0,s,rho,epsilon,f,h)
 C_mlmc_tune = toc;
 % optimal N

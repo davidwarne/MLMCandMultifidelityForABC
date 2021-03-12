@@ -15,9 +15,9 @@
 %
 % initialise random number generator for reproducibility
 rng(513,'twister');
-
+epsilon,tau,N,M
 % NOTE: tau provided by external script
-tau = 0.01
+%tau = 0.01
 % generate data from discrete sampling of a single realisation, 
 % no observation error (set up based on Prescott and Baker 2020)
 k_true = [1;1000;20;2;5;1]; % [alpha0,alpha,K,n,beta,gamma] 
@@ -46,7 +46,7 @@ f = @(x) x(1,:);
 %% Set up ABC Mulitfidelity
 s_approx = @(k) GenerateApproxObservations(rep,[k_true(1:2);k;k_true(5:6)],X0,1,Obs_I,t,sig,tau);
 s_cpl = @(k,c1,c2,c3) GenerateCoupledObservations(rep,[k_true(1:2);k;k_true(5:6)],X0,1,Obs_I,t,sig,c1,c2,c3);
-epsilon = 200;
+%epsilon = 200;
 p = @() unifrnd(kmin,kmax);
 %N = 20000;
 %tic;
@@ -54,8 +54,8 @@ p = @() unifrnd(kmin,kmax);
 %C_mfroc= toc;
 %fprintf('ABC Multifidelity optimisation in %f Sec\n',C_mfroc)
 % Prior sampler
-N = 10000;
-M = N/10;
+%N = 10000;
+%M = N/10;
 %% Run and Time ABC Multifidelity
 fprintf('Running Adaptive ABC Multifidelity ...\n');
 tic;
@@ -63,5 +63,5 @@ tic;
 C_mf = toc;
 fprintf('ABC Adaptive Multifidelity Completed in %f Sec\n',C_mf)
 
-save(['AdaptiveMF_Rep_tau',num2str(tau),'.mat']);
+save(['AdaptiveMF_Rep_epsilon',num2str(epsilon),'_tau',num2str(tau),'N',num2str(N),'M',num2str(M),'.mat']);
 

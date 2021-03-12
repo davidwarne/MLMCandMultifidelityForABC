@@ -10,7 +10,8 @@
 % initialise random number generator for reproducibility
 rng(513,'twister');
 % NOTE: parameters for the number of levels provided by external script
-L = 6;
+L,epsilonL,NLmin
+%L = 6;
 % generate data from discrete sampling of a single realisation, 
 % no observation error (set up based on Prescott and Baker 2020)
 k_true = [1;1000;20;2;5;1]; % [alpha0,alpha,K,n,beta,gamma] 
@@ -40,7 +41,7 @@ f = @(x) x(1,:);
 %% Set up ABC MLMC 
 epsilon = zeros(L,1);
 epsilon(1) = 1600;
-epsilon(L) = 200;
+epsilon(L) = epsilonL;
 % determine scale factor
 m = exp(log(epsilon(1)/epsilon(L))/(L-1));
 for l=(L-1):-1:2
@@ -55,6 +56,9 @@ tic;
 %N = [800;400;200;100;50]; % TODO: apply optimal choice
 h = 0.04n   ; % target RMSE 
 N = ABCMLMCN(100,p,supp0,s,rho,epsilon,f,h)
+if N(L) < NLmin
+    N = N*(NLmin/N(L)); % rescale to ensure a minimum exact level
+end
 C_mlmc_tune = toc;
 % optimal N
 %% Run and time ABC MLMC
@@ -65,4 +69,4 @@ tic;
 C_mlmc = toc;
 fprintf('ABC MLMC Completed in %f Sec\n',C_mlmc);
 
-save(['MLMC_Rep_L',num2str(L),'_',num2str(m),'.mat']);
+save(['MLMC_Rep_epsilon',num2str(epsilonL),'_L',num2str(L),'NLmin',num2str(NLmin),'.mat']);

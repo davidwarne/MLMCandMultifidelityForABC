@@ -1,4 +1,4 @@
-function [E,V,ESS,eta1,eta2] = ABCAdaptiveMultifidelity(N,M,p,s,rho,epsilon,s_approx,rho_approx,epsilon_approx,varargin)
+function [E,V,ESS,eta1,eta2] = ABCAdaptiveGradientMultifidelity(N,M,p,s,rho,epsilon,s_approx,rho_approx,epsilon_approx,varargin)
 %% Adaptive early accept/reject multifidelity for approximate Bayesian computation
 % The function adaptively updates the optimal continuation probabililties based on
 % increasingly accurate estimates of ROC properties.
@@ -64,7 +64,10 @@ mu = sum(w.*f(theta))/Z;
 
 % Receiver Operator Characteristics
 ROC_MAT = get_burnin_ROC(theta_burnin, w_approx, w_exact, varargin{:});
-[eta1, eta2] = estimate_eta(p_pos, p_pos_given_cont, mu, ROC_MAT, Ec, cp, cn);
+
+% Start stepping optimal eta
+delta_evolve = 10;
+[eta1, eta2] = evolve_eta(1, 1, p_pos, p_pos_given_cont, mu, ROC_MAT, Ec, cp, cn, delta_evolve);
 
 %-----------------------------------%
 % Begin main part of algorithm
@@ -132,7 +135,7 @@ for i = 1:(N-M)
         ROC_MAT = ROC_MAT + (dROC - ROC_MAT)/(M+k);
     end
     
-    [eta1, eta2] = estimate_eta(p_pos, p_pos_given_cont, mu, ROC_MAT, Ec, cp, cn);
+    [eta1, eta2] = evolve_eta(eta1, eta2, p_pos, p_pos_given_cont, mu, ROC_MAT, Ec, cp, cn, delta_evolve);
     
     if rem(i,update_factor)==0
         fprintf('%0.3f complete, eta1 = %0.3f ; eta2 = %0.3f ; Z = %0.3f ; pairs = %d \n', (M+i)/N, eta1, eta2, Z/(M+i), M+k);
@@ -211,7 +214,7 @@ function [ROC_MAT] = get_burnin_ROC(theta, w_approx, w_exact, varargin)
     ROC_MAT = (moment_mat * mf_mat')/M;
 end
 
-function [eta1, eta2] = estimate_eta(rho_n, rho_k, mu, ROC_MAT, Ec, cp, cn)
+function [eta1, eta2] = evolve_eta(eta1, eta2, rho_n, rho_k, mu, ROC_MAT, Ec, cp, cn, delta)
     mu_v = [mu^2 -2*mu 1];
     ptp = (rho_n/rho_k) * (mu_v * ROC_MAT(:,1));
     pfp = (rho_n/rho_k) * (mu_v * ROC_MAT(:,2));
@@ -221,30 +224,11 @@ function [eta1, eta2] = estimate_eta(rho_n, rho_k, mu, ROC_MAT, Ec, cp, cn)
     cn = ((1-rho_n)/(1-rho_k)) * cn;
     
     % estimate optimal eta1 and eta2 (using f-dependent efficiency measure)
-    R_0 = ptp - pfp;
-    if R_0 > 0
-        R_p = pfp/(cp/Ec);
-        R_n = pfn/(cn/Ec);
-        if max(R_p,R_n) <= R_0
-            eta1 = sqrt(R_p/R_0);
-            eta2 = sqrt(R_n/R_0);
-        else
-            eta1b = min(1,sqrt(R_p/R_0)/sqrt((1+pfn/R_0)/(1+cn/Ec)));
-            eta2b = min(1,sqrt(R_n/R_0)/sqrt((1+pfp/R_0)/(1+cp/Ec)));
-            % if phi(1,eta2) <= phi(eta1,1)
-            if  (R_0 + pfp +pfn/eta2b)*(Ec + cp + eta2b*cn) <= (R_0 + pfp/eta1b +pfn)*(Ec + eta1b*cp + cn) 
-                eta1 = 1;
-                eta2 = eta2b;
-            else
-                eta1 = eta1b;
-                eta2 = 1;
-            end
-        end
-        % to avoid reducing to ABC rejection on the approximate model only.
-        eta1 = max(eta1,1e-2);
-        eta2 = max(eta2,1e-2);
-    else
-        eta1 = 1;
-        eta2 = 1;
-    end
+    R0 = ptp - pfp;
+    grad1 = pfp*cn*eta2/eta1 - pfn*cp*eta1/eta2 - cp*R0*eta1 + pfp*Ec/eta1;
+    grad2 = pfn*cp*eta1/eta2 - pfp*cn*eta2/eta1 - cn*R0*eta2 + pfn*Ec/eta2;
+    
+    grad_scale =  (Ec + cp + cn)*(mu^2);    
+    eta1 = min(1, eta1 * exp(delta*grad1/grad_scale));
+    eta2 = min(1, eta2 * exp(delta*grad2/grad_scale));
 end

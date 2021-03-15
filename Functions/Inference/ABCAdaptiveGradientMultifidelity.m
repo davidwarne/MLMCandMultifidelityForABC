@@ -143,15 +143,20 @@ for i = 1:(N-M)
 end
 
 F = f(theta);
-% compute Multifiedlity estimator
-E = sum(w.*F)/(sum(w));
-% compute Variance applroximation
-mu_w = mean(w);
-mu_wf = mean(w.*F);
-c = cov(w,w.*F);
-V = (var(w)*(mu_wf/mu_w)^2 + var(w.*F) - 2*c(1,2)*(mu_wf/mu_w))/(N*mu_w^2);
+
+% compute Multifidelity estimator
+Sigma_w = sum(w);
+Sigma_wf = sum(w.*F);
+E = Sigma_wf/Sigma_w;
+
+% compute Variance approximation
+centred_w = w - (Sigma_w/N);
+centred_wf = w.*F - (Sigma_wf/N);
+
+V = sum((E*centred_w - centred_wf).^2)/Sigma_w^2;
+
 % effective sample size (proportional to ESS \propto 1/V)
-ESS = (sum(w)^2)/sum(w.*w);
+ESS = (Sigma_w^2)/sum(w.*w);
 
 
 end

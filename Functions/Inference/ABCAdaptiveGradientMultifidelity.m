@@ -1,4 +1,4 @@
-function [E,V,ESS,eta1,eta2] = ABCAdaptiveGradientMultifidelity(N,M,p,s,rho,epsilon,s_approx,rho_approx,epsilon_approx,varargin)
+function [E,V,ESS,c_sim,eta1,eta2] = ABCAdaptiveGradientMultifidelity(N,M,p,s,rho,epsilon,s_approx,rho_approx,epsilon_approx,varargin)
 %% Adaptive early accept/reject multifidelity for approximate Bayesian computation
 % The function adaptively updates the optimal continuation probabililties based on
 % increasingly accurate estimates of ROC properties.
@@ -34,6 +34,9 @@ function [E,V,ESS,eta1,eta2] = ABCAdaptiveGradientMultifidelity(N,M,p,s,rho,epsi
 %-----------------------------------%
 % Start with burn-in
 [theta_burnin, w_approx, w_exact, c_approx, c_exact] = generate_burnin(M,p,s,rho,epsilon,s_approx,rho_approx,epsilon_approx);
+
+% Keep track of simulation burden
+c_sim = sum(c_approx) + sum(c_exact);
 
 % Get post burn-in stats for an initial guess of optimal eta1, eta2
 
@@ -85,6 +88,7 @@ for i = 1:(N-M)
     start_t = toc;
     [D_s_approx, couple_arg_1, couple_arg_2, couple_arg_3] = s_approx(theta_trial);
     c_approx_trial = toc - start_t;
+    c_sim = c_sim + c_approx_trial;
         
     % update Ec (average approximate simulation time)
     Ec = Ec + (c_approx_trial - Ec)/(M+i);
@@ -110,6 +114,7 @@ for i = 1:(N-M)
         start_t = toc;
         D_s = s(theta_trial, couple_arg_1, couple_arg_2, couple_arg_3);
         c_exact_trial = toc - start_t;
+        c_sim = c_sim + c_exact_trial;
         
         % update cp and cn
         cp = cp + (c_exact_trial*w_approx_trial - cp)/(M+k);

@@ -1,4 +1,4 @@
-function [N]= ABCMLMCN(M,p,supp0,s,rho,epsilon,f,h)
+function [Ns,c,v,vabc]= ABCMLMCN(M,p,supp0,s,rho,epsilon,f)
 %% Estimate optimal sample size sequence for MLMC based ABC
 %
 % Inputs:
@@ -9,12 +9,12 @@ function [N]= ABCMLMCN(M,p,supp0,s,rho,epsilon,f,h)
 %    rho - discrepancy metric, treated as a function of simulated data only
 %    epsilon - a sequence of discrepancy acceptance thresholds
 %    f - functional to estimate E[f(theta)] w.r.t. the ABC posterior measure
-%    h - target root meansquare error
 %
 % Outputs:
-%    E - Joint posterior mean estimate
-%    V - estimator variances
-%    F - Marginal CDF estimates (continuous functions)
+%   Ns - Sample size sequence for RMSE = O(1) scale by h^-2 for RMSE = O(h)
+%   c - sequence of computational costs per level
+%   v - sequence of variances per level (of biased esitmate and correction teerms)
+%   vabc - sequence of variances per level for direct ABC
 %
 % Author:
 %   David J. Warne[1,2,3] (david.warne@qut.edu.au)
@@ -35,8 +35,9 @@ supp = supp0;
 C = 1e16;
 k = length(supp.l);
 v = zeros(L,1);
+vabc = zeros(L,1);
 c = zeros(L,1);
-N = zeros(L,1);
+Ns = zeros(L,1);
 x = [];
 for j=1:k
     x = [x;linspace(supp.l(j),supp.u(j),100)];
@@ -69,7 +70,8 @@ for l=1:L
         end
         E = mean(f(theta{l}));
         V = (1/(M-1))*(mean(f(theta{l}).^2) - E.^2); 
-        v(:,l) = V;
+        v(l) = V;
+        vabc(l) = V;
     else
         % generate approximate coupled l-1 samples
         theta_lm1 = zeros(size(theta{l}));
@@ -101,10 +103,12 @@ for l=1:L
         E = E + Pl;
         v(l) = (1/(M-1))*(mean((f(theta{l}) - f(theta_lm1)).^2) - Pl.^2);
         V = V + v(l);
+        El = mean(f(theta{l})); 
+        vabc(l) = (1/(M-1))*(mean(f(theta{l}).^2) - El.^2); 
     end
     c(l) = toc - start_t;
 end
 
 for l=1:L
-    N(l) = sqrt(v(l)/c(l))*sum((v.*c).^(1/2))/(h^2);
+    Ns(l) = sqrt(v(l)/c(l))*sum((v.*c).^(1/2));
 end

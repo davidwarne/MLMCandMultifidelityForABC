@@ -1,4 +1,4 @@
-function [E,V,F]= ABCMLMC(N,p,supp0,s,rho,epsilon,f,h)
+function [E,V,F,c,N]= ABCMLMC(N,p,supp0,s,rho,epsilon,f,h)
 %% Multilevel Monte Carlo Sampler for approximate Bayesian computaion to compute
 % the posterior mean
 %
@@ -17,6 +17,7 @@ function [E,V,F]= ABCMLMC(N,p,supp0,s,rho,epsilon,f,h)
 %    E - Joint posterior mean estimate
 %    V - estimator variances
 %    F - Marginal CDF estimates (continuous functions)
+%    c - compute cost per level
 %
 % Author:
 %   David J. Warne[1,2,3] (david.warne@qut.edu.au)
@@ -28,14 +29,17 @@ function [E,V,F]= ABCMLMC(N,p,supp0,s,rho,epsilon,f,h)
 
 % determine trial N
 if length(N) == 1
-    N = ABCMLMCN(N,p,supp0,s,rho,epsilon,f,h)
+    N = ABCMLMCN(N,p,supp0,s,rho,epsilon,f); 
 end
+
+N = N/(h^2);
 
 % initialise
 L = length(epsilon);
 theta = cell(L,1); 
 supp = supp0;
 C = 1e16;
+c = zeros(L,1);
 k = length(supp.l);
 x = [];
 for j=1:k
@@ -48,6 +52,7 @@ for l=1:L
     %  ABC rejection step
     pl = @() p(supp.l,supp.u);
     supp_prev = supp;
+    start_t = toc;
     theta{l} = ABCRejectionSampler(N(l),pl,s,rho,epsilon(l));
     % compute marginal eCDFs and support
     for j=1:k
@@ -97,4 +102,5 @@ for l=1:L
         E = E + Pl;
         V = V +  (1/(N(l)-1))*(mean((f(theta{l}) - f(theta_lm1)).^2) - Pl.^2);
     end
+    c(l) = toc - start_t;
 end

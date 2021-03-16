@@ -1,4 +1,4 @@
-function [E,V,ESS,c_sim,eta1,eta2] = ABCAdaptiveGradientMultifidelity(N,M,p,s,rho,epsilon,s_approx,rho_approx,epsilon_approx,varargin)
+function [E,V,ESS,c_sim,eta1,eta2,pairs] = ABCAdaptiveGradientMultifidelity(N,M,p,s,rho,epsilon,s_approx,rho_approx,epsilon_approx,varargin)
 %% Adaptive early accept/reject multifidelity for approximate Bayesian computation
 % The function adaptively updates the optimal continuation probabililties based on
 % increasingly accurate estimates of ROC properties.
@@ -20,6 +20,7 @@ function [E,V,ESS,c_sim,eta1,eta2] = ABCAdaptiveGradientMultifidelity(N,M,p,s,rh
 %    V - Estimator variance (based on delta method approximation)
 %    ESS - Effective Sample Size
 %    eta1, eta2 - final values for optimal continuation probabilities
+%    pairs - number of pairs computed
 %
 % Authors:
 %   Thomas P. Prescott[1] (prescott@maths.ox.ac.uk)
@@ -146,6 +147,8 @@ for i = 1:(N-M)
         fprintf('%0.3f complete, eta1 = %0.3f ; eta2 = %0.3f ; Z = %0.3f ; pairs = %d \n', (M+i)/N, eta1, eta2, Z/(M+i), M+k);
     end
 end
+
+pairs = M + k;
 
 F = f(theta);
 

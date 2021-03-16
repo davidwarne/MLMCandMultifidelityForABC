@@ -62,7 +62,7 @@ p = @() unifrnd(kmin,kmax);
 %% Run and Time ABC Multifidelity
 fprintf('Running Adaptive ABC Multifidelity ...\n');
 tic;
-[E_mf,V_mf,ESS_mf,Csim_mf] = ABCAdaptiveGradientMultifidelity(N,M,p,s_cpl,rho,epsilon,s_approx,rho,epsilon,f);
+[E_mf,V_mf,ESS_mf,Csim_mf,eta1,eta2,pairs] = ABCAdaptiveGradientMultifidelity(N,M,p,s_cpl,rho,epsilon,s_approx,rho,epsilon,f);
 C_mf = toc;
 fprintf('ABC Adaptive Multifidelity Completed in %f Sec\n',C_mf)
 

@@ -1,4 +1,4 @@
-function [E,V,ESS,eta1,eta2] = ABCAdaptiveGradientMultifidelity(N,M,p,s,rho,epsilon,s_approx,rho_approx,epsilon_approx,varargin)
+function [E,V,ESS,c_sim,eta1,eta2,pairs] = ABCAdaptiveGradientMultifidelity(N,M,p,s,rho,epsilon,s_approx,rho_approx,epsilon_approx,varargin)
 %% Adaptive early accept/reject multifidelity for approximate Bayesian computation
 % The function adaptively updates the optimal continuation probabililties based on
 % increasingly accurate estimates of ROC properties.
@@ -20,6 +20,7 @@ function [E,V,ESS,eta1,eta2] = ABCAdaptiveGradientMultifidelity(N,M,p,s,rho,epsi
 %    V - Estimator variance (based on delta method approximation)
 %    ESS - Effective Sample Size
 %    eta1, eta2 - final values for optimal continuation probabilities
+%    pairs - number of pairs computed
 %
 % Authors:
 %   Thomas P. Prescott[1] (prescott@maths.ox.ac.uk)
@@ -34,6 +35,9 @@ function [E,V,ESS,eta1,eta2] = ABCAdaptiveGradientMultifidelity(N,M,p,s,rho,epsi
 %-----------------------------------%
 % Start with burn-in
 [theta_burnin, w_approx, w_exact, c_approx, c_exact] = generate_burnin(M,p,s,rho,epsilon,s_approx,rho_approx,epsilon_approx);
+
+% Keep track of simulation burden
+c_sim = sum(c_approx) + sum(c_exact);
 
 % Get post burn-in stats for an initial guess of optimal eta1, eta2
 
@@ -85,6 +89,7 @@ for i = 1:(N-M)
     start_t = toc;
     [D_s_approx, couple_arg_1, couple_arg_2, couple_arg_3] = s_approx(theta_trial);
     c_approx_trial = toc - start_t;
+    c_sim = c_sim + c_approx_trial;
         
     % update Ec (average approximate simulation time)
     Ec = Ec + (c_approx_trial - Ec)/(M+i);
@@ -110,6 +115,7 @@ for i = 1:(N-M)
         start_t = toc;
         D_s = s(theta_trial, couple_arg_1, couple_arg_2, couple_arg_3);
         c_exact_trial = toc - start_t;
+        c_sim = c_sim + c_exact_trial;
         
         % update cp and cn
         cp = cp + (c_exact_trial*w_approx_trial - cp)/(M+k);
@@ -142,16 +148,23 @@ for i = 1:(N-M)
     end
 end
 
+pairs = M + k;
+
 F = f(theta);
-% compute Multifiedlity estimator
-E = sum(w.*F)/(sum(w));
-% compute Variance applroximation
-mu_w = mean(w);
-mu_wf = mean(w.*F);
-c = cov(w,w.*F);
-V = (var(w)*(mu_wf/mu_w)^2 + var(w.*F) - 2*c(1,2)*(mu_wf/mu_w))/(N*mu_w^2);
+
+% compute Multifidelity estimator
+Sigma_w = sum(w);
+Sigma_wf = sum(w.*F);
+E = Sigma_wf/Sigma_w;
+
+% compute Variance approximation
+centred_w = w - (Sigma_w/N);
+centred_wf = w.*F - (Sigma_wf/N);
+
+V = sum((E*centred_w - centred_wf).^2)/Sigma_w^2;
+
 % effective sample size (proportional to ESS \propto 1/V)
-ESS = (sum(w)^2)/sum(w.*w);
+ESS = (Sigma_w^2)/sum(w.*w);
 
 
 end

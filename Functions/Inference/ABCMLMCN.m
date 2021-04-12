@@ -1,4 +1,4 @@
-function [N]= ABCMLMCN(M,p,supp0,s,rho,epsilon,f,h)
+function [N,v,c]= ABCMLMCN(M,p,supp0,s,rho,epsilon,f,h)
 %% Estimate optimal sample size sequence for MLMC based ABC
 %
 % Inputs:
@@ -12,9 +12,9 @@ function [N]= ABCMLMCN(M,p,supp0,s,rho,epsilon,f,h)
 %    h - target root meansquare error
 %
 % Outputs:
-%    E - Joint posterior mean estimate
-%    V - estimator variances
-%    F - Marginal CDF estimates (continuous functions)
+%    N - sequence of sample sizes at each level
+%    v - sequence of variances at each level
+%    c - sequence of computational costs at each level
 %
 % Author:
 %   David J. Warne[1,2,3] (david.warne@qut.edu.au)

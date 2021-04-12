@@ -11,6 +11,9 @@
 rng(513,'twister');
 % NOTE: parameters for the number of levels provided by external script
 L,epsilonL,NLmin
+L = 4;
+epsilonL = 500;
+NLmin = 100;
 %L = 6;
 % generate data from discrete sampling of a single realisation, 
 % no observation error (set up based on Prescott and Baker 2020)
@@ -47,6 +50,7 @@ m = exp(log(epsilon(1)/epsilon(L))/(L-1));
 for l=(L-1):-1:2
     epsilon(l) = epsilon(l+1)*m;
 end
+epsilon
 % create uniform joint prior
 supp0.l = kmin;
 supp0.u = kmax;
@@ -54,8 +58,8 @@ p = @(l,u) unifrnd(l,u);
 tic;
 % sequence of sample numbers
 %N = [800;400;200;100;50]; % TODO: apply optimal choice
-h = 0.04n   ; % target RMSE 
-N = ABCMLMCN(100,p,supp0,s,rho,epsilon,f,h)
+h = 0.04   ; % target RMSE 
+N = ABCMLMCN(10,p,supp0,s,rho,epsilon,f,h)
 if N(L) < NLmin
     N = N*(NLmin/N(L)); % rescale to ensure a minimum exact level
 end

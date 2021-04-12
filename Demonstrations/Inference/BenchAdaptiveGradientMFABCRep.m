@@ -15,8 +15,11 @@
 %
 % initialise random number generator for reproducibility
 rng(513,'twister');
-% NOTE: tau provided by external script
-% tau = 0.01
+
+% NOTE: epsilon, tau, N and M provided by external script
+%epsilon = 500;
+%tau = 0.01;
+%N = 1000;
 % generate data from discrete sampling of a single realisation, 
 % no observation error (set up based on Prescott and Baker 2020)
 k_true = [1;1000;20;2;5;1]; % [alpha0,alpha,K,n,beta,gamma] 
@@ -47,20 +50,17 @@ s_approx = @(k) GenerateApproxObservations(rep,[k_true(1:2);k;k_true(5:6)],X0,1,
 s_cpl = @(k,c1,c2,c3) GenerateCoupledObservations(rep,[k_true(1:2);k;k_true(5:6)],X0,1,Obs_I,t,sig,c1,c2,c3);
 %epsilon = 200;
 p = @() unifrnd(kmin,kmax);
-%N = 20000;
-%tic;
-%[eta1,eta2,p_fp,p_fn,p_tp,p_tn,ctilde,cp,cn,rho_dist,rho_dist_approx] = MultifidelityROC(N,p,f,rho,5,f_approx,rho,5);
-%C_mfroc= toc;
-%fprintf('ABC Multifidelity optimisation in %f Sec\n',C_mfroc)
-% Prior sampler
-%N = 10000;
-%M = N/10;
-%% Run and Time ABC Multifidelity
-fprintf('Running Adaptive ABC Multifidelity ...\n');
-tic;
-[E_mf,V_mf,ESS_mf,Csim_mf,eta1,eta2,pairs] = ABCAdaptiveGradientMultifidelity(N,M,p,s_cpl,rho,epsilon,s_approx,rho,epsilon,f);
-C_mf = toc;
-fprintf('ABC Adaptive Multifidelity Completed in %f Sec\n',C_mf)
 
-save(['AdaptiveMF_Rep_epsilon',num2str(epsilon),'_tau',num2str(tau),'N',num2str(N),'M',num2str(M),'.mat']);
+%% Run and Time ABC Multifidelity
+for i = 1:10
+    fprintf('Running Adaptive ABC Multifidelity ...\n');
+    tic;
+    Ni = N*2^(i-1);
+    Mi = Ni/10;
+    [E_mf,V_mf,ESS_mf,Csim_mf,eta1,eta2,pairs] = ABCAdaptiveGradientMultifidelity(Ni,Mi,p,s_cpl,rho,epsilon,s_approx,rho,epsilon,f);
+    C_mf = toc;
+    fprintf('ABC Adaptive Multifidelity Completed in %f Sec\n',C_mf)
+    save(['Bench_AdaptiveMF_Rep_epsilon',num2str(epsilon),'_tau',num2str(tau),'_',num2str(i),'.mat']);
+end
+
 

@@ -25,9 +25,13 @@ bcrn.M = length(k);
 % number of chemical species
 bcrn.N = 4;                        
 % reactant stoichiometries
-bcrn.nu_minus = [1,1,0,0;0,0,1,0;0,0,1,0];
+bcrn.nu_minus = [1,1,0,0;
+                 0,0,1,0;
+                 0,0,1,0];
 % product stoichiometries
-bcrn.nu_plus = [0,0,1,0;1,1,0,0;0,1,0,1];
+bcrn.nu_plus = [0,0,1,0;
+                1,1,0,0;
+                0,1,0,1];
 % stoichiometric matrix
 bcrn.nu = bcrn.nu_plus - bcrn.nu_minus;
 % initial copy numbers

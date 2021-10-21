@@ -17,9 +17,9 @@
 rng(513,'twister');
 
 % NOTE: epsilon, tau, N and M provided by external script
-epsilonL = 150;
-L = 3;
-tau = 0.5;
+%epsilonL = 150;
+%L = 3;
+%tau = 0.5;
 %N = 1000;
 % generate data from discrete sampling of a single realisation, 
 % no observation error 
@@ -76,7 +76,7 @@ supp0.u = kmax;
 p = @(l,u) unifrnd(l,u);
 tic;
 % estimate MLMC sequence
-Ns = ABCAdaptiveGradientMultifidelityMLMCN(10000,100,p,supp0,s_cpl,rho,epsilon,...
+Ns = ABCAdaptiveGradientMultifidelityMLMCN(10000,1000,p,supp0,s_cpl,rho,epsilon,...
     s_approx,rho_approx,epsilon_approx,f);
 %%
 S = ceil(Ns(L))/Ns(L);
@@ -88,10 +88,10 @@ for i=1:10
     fprintf('Running ABC MF MLMC...\n');
     tic;
     Ni = Ns*2^(i-1);
-    [E_mfmlmc,V_mfmlmc,F_mfmlmc] = ABCAdaptiveGradientMultifidelityMLMC(Ni,100*ones(size(Ni)),p,supp0,s_cpl,rho,epsilon,...
+    [E_mfmlmc,V_mfmlmc,F_mfmlmc] = ABCAdaptiveGradientMultifidelityMLMC(Ni,1000*ones(size(Ni)),p,supp0,s_cpl,rho,epsilon,...
     s_approx,rho_approx,epsilon_approx,f);
     C_mfmlmc = toc;
-    fprintf('ABC MF MLMC Completed in %f Sec\n',C_mlmc);
+    fprintf('ABC MF MLMC Completed in %f Sec\n',C_mfmlmc);
     save(['Bench_MFMLMC_MAPK_epsilon',num2str(epsilonL),'_L',num2str(L),'_',num2str(i),'.mat']);
 end
 %%% Run and Time ABC Multifidelity

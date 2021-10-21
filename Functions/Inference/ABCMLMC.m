@@ -1,4 +1,4 @@
-function [E,V,F,c,N]= ABCMLMC(N,p,supp0,s,rho,epsilon,f,h)
+function [E,V,F,c]= ABCMLMC(N,p,supp0,s,rho,epsilon,f)
 %% Multilevel Monte Carlo Sampler for approximate Bayesian computaion to compute
 % the posterior mean
 %
@@ -11,7 +11,6 @@ function [E,V,F,c,N]= ABCMLMC(N,p,supp0,s,rho,epsilon,f,h)
 %    rho - discrepancy metric, treated as a function of simulated data only
 %    epsilon - a sequence of discrepancy acceptance thresholds
 %    f - functional to estimate E[f(theta)] w.r.t. the ABC posterior measure
-%    h - if length(N) == 1, then h is the target RMSE.
 %
 % Outputs:
 %    E - Joint posterior mean estimate
@@ -30,9 +29,8 @@ function [E,V,F,c,N]= ABCMLMC(N,p,supp0,s,rho,epsilon,f,h)
 % determine trial N
 if length(N) == 1
     N = ABCMLMCN(N,p,supp0,s,rho,epsilon,f); 
+    N = ceil(N);
 end
-
-N = N/(h^2);
 
 % initialise
 L = length(epsilon);

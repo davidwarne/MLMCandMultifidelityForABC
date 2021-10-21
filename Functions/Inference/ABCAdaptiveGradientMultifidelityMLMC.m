@@ -91,7 +91,7 @@ for l=1:L
         % generate approximate coupled l-1 samples
         theta_lm1 = zeros(size(theta{l}));
         for j=1:k
-            theta_lm1(j,:) = Finv{j}(eFl{j}(theta{l}(j,:)));
+            theta_lm1(j,:) = Finv{j}(Fl{j}(theta{l}(j,:)));
         end
         for j=1:k
             % compute marginal bias correction

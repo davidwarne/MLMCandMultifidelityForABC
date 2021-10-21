@@ -68,13 +68,10 @@ f = @(x) x(7,:);
 
 %% Set up ABC Mulitfidelity approximate model
 % for the moment assume a fixed tau for all levels
-sl_approx = @(k) GenerateApproxObservations(MAPK,[k_true(1);k(1);k(2);k_true(4);k(3);k(4);k_true(7);k(5);k(6);k_true(10);k(7);k(8)],X0,1,Obs_I,t,sig,tau);
+s_approx = @(k) GenerateApproxObservations(MAPK,[k_true(1);k(1);k(2);k_true(4);k(3);k(4);k_true(7);k(5);k(6);k_true(10);k(7);k(8)],X0,1,Obs_I,t,sig,tau);
 s_cpl = @(k,c1,c2,c3) GenerateCoupledObservations(MAPK,[k_true(1);k(1);k(2);k_true(4);k(3);k(4);k_true(7);k(5);k(6);k_true(10);k(7);k(8)],X0,1,Obs_I,t,sig,c1,c2,c3);
 %epsilon = 200;f = @(x) x(1,:);
 
-%% Set up ABC Mulitfidelity
-s_approx = @(k) GenerateApproxObservations(rep,[k_true(1:2);k;k_true(5:6)],X0,1,Obs_I,t,sig,tau);
-s_cpl = @(k,c1,c2,c3) GenerateCoupledObservations(rep,[k_true(1:2);k;k_true(5:6)],X0,1,Obs_I,t,sig,c1,c2,c3);
 %epsilon = 200;
 p = @() unifrnd(kmin,kmax);
 
@@ -87,7 +84,7 @@ for i = 1:10
     [E_mf,V_mf,ESS_mf,Csim_mf,eta1,eta2,pairs] = ABCAdaptiveGradientMultifidelity(Ni,Mi,p,s_cpl,rho,epsilon,s_approx,rho,epsilon,f);
     C_mf = toc;
     fprintf('ABC Adaptive Multifidelity Completed in %f Sec\n',C_mf)
-    save(['Bench_AdaptiveMF_Rep_epsilon',num2str(epsilon),'_tau',num2str(tau),'_',num2str(i),'.mat']);
+    save(['Bench_AdaptiveMF_MAPK_epsilon',num2str(epsilon),'_tau',num2str(tau),'_',num2str(i),'.mat']);
 end
 
 

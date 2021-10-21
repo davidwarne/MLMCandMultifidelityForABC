@@ -1,4 +1,4 @@
-function [E,V,ESS,c_sim,eta1,eta2,pairs,theta,w] = ABCAdaptiveGradientMultifidelity(N,M,p,s,rho,epsilon,s_approx,rho_approx,epsilon_approx,varargin)
+function [E,V,ESS,c_sim,eta1,eta2,pairs,theta,w,ROC_MAT,Ec,cn,cp] = ABCAdaptiveGradientMultifidelity(N,M,p,s,rho,epsilon,s_approx,rho_approx,epsilon_approx,varargin)
 %% Adaptive early accept/reject multifidelity for approximate Bayesian computation
 % The function adaptively updates the optimal continuation probabililties based on
 % increasingly accurate estimates of ROC properties.

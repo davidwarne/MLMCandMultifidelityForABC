@@ -24,7 +24,6 @@ function [Ns,c,v,vabc]= ABCMLMCN(M,p,supp0,s,rho,epsilon,f)
 %   [2] Centre for Data Science, Queensland University of Technology, Autralia
 %   [3] ARC Centre of Excellence for Mathematical and Statistical Frontiers
 
-
 % initialise
 L = length(epsilon);
 

@@ -20,10 +20,15 @@ function [Y_obs, varargout] = GenerateApproxObservations(bcrn,k,X0,N,I,t,sigma,t
 %    optional outputs D and P representing the coupling from tau leap
 %
 %
-% Author:
-%   David J. Warne (david.warne@qut.edu.au)
-%         School of Mathematical Sciences
-%         Queensland University of Technology
+% Authors:
+%   Thomas P. Prescott[1] (tprescott@turing.ac.uk)
+%   David J. Warne[2,3,4] (david.warne@qut.edu.au)
+%   
+% Affiliations:
+%   [1] The Alan Turing Institute, London, UK
+%   [2] School of Mathematical Sciences, Queensland University of Technology, Autralia
+%   [3] Centre for Data Science, Queensland University of Technology, Autralia
+%   [4] ARC Centre of Excellence for Mathematical and Statistical Frontiers
 
 Nt = length(t);
 Y_obs = zeros(length(I),Nt,N);

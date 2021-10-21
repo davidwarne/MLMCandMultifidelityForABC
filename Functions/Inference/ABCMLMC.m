@@ -1,10 +1,9 @@
 function [E,V,F,c]= ABCMLMC(N,p,supp0,s,rho,epsilon,f)
-%% Multilevel Monte Carlo Sampler for approximate Bayesian computaion to compute
-% the posterior mean
+%% Multilevel Monte Carlo Sampler for approximate Bayesian computation
+%   to compute expectation E[f(theta)] with respect to the ABC posterior
 %
 % Inputs:
-%    N - A sequence of sample sizes if length(N) == 1, then N is the number of trial
-%        samples at each level determine optimal N
+%    N - A sequence of sample sizes
 %    p - prior distribution sampler, 
 %    supp0 - initial support region for sampling
 %    s - function that generates simulated data give a parameters set

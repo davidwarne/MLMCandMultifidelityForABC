@@ -1,6 +1,6 @@
 function [E,V,ESS] = ABCMultifidelity(N,p,s,rho,epsilon,s_approx,rho_approx,epsilon_approx,eta1,eta2,f)
-%% Early accept/reject multifidelity for approximate Bayesian computaion to compute
-% the posterior mean
+%% Early accept/reject multifidelity for approximate Bayesian computation 
+% to compute expectation E[f(theta)] with respect to the ABC posterior
 %
 % Inputs:
 %    N - Number of samples
@@ -21,11 +21,11 @@ function [E,V,ESS] = ABCMultifidelity(N,p,s,rho,epsilon,s_approx,rho_approx,epsi
 %    ESS - Effective Sample Size
 %
 % Authors:
-%   Thomas P. Prescott[1] (prescott@maths.ox.ac.uk)
+%   Thomas P. Prescott[1] (tprescott@turing.ac.uk)
 %   David J. Warne[2,3,4] (david.warne@qut.edu.au)
 %   
 % Affiliations:
-%   [1] Mathematical Institute, University of Oxford, UK
+%   [1] The Alan Turing Institute, London, UK
 %   [2] School of Mathematical Sciences, Queensland University of Technology, Autralia
 %   [3] Centre for Data Science, Queensland University of Technology, Autralia
 %   [4] ARC Centre of Excellence for Mathematical and Statistical Frontiers

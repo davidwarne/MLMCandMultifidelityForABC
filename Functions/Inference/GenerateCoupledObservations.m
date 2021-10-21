@@ -1,8 +1,8 @@
 function [Y_obs] = GenerateCoupledObservations(bcrn,k,X0,N,I,t,sigma,D_obs,P_obs,zeta_obs)
 %% Generate Observations
-% Generates N Observations of state dimensions I of stochastic process X(t)
-% with rate parameters k and initial condition X(0) = X0 = X0. Observations are 
-% taken at time points t(1),..,t(Nt) with observation error 
+% Generates N Observations of state dimensions I of stochastic process X(t) conditional
+% on approximate observations with rate parameters k and initial condition X(0) = X0 = X0. 
+% Observations are taken at time points t(1),..,t(Nt) with observation error 
 % Y_obs(t(i)) = X(t(i)) + zeta, where zeta ~ N(0,sigma^2)
 %
 % Inputs:
@@ -24,10 +24,15 @@ function [Y_obs] = GenerateCoupledObservations(bcrn,k,X0,N,I,t,sigma,D_obs,P_obs
 % Outputs:
 %     a Table of observations Y_obs
 %
-% Author:
-%   David J. Warne (david.warne@qut.edu.au)
-%         School of Mathematical Sciences
-%         Queensland University of Technology
+% Authors:
+%   Thomas P. Prescott[1] (tprescott@turing.ac.uk)
+%   David J. Warne[2,3,4] (david.warne@qut.edu.au)
+%   
+% Affiliations:
+%   [1] The Alan Turing Institute, London, UK
+%   [2] School of Mathematical Sciences, Queensland University of Technology, Autralia
+%   [3] Centre for Data Science, Queensland University of Technology, Autralia
+%   [4] ARC Centre of Excellence for Mathematical and Statistical Frontiers
 
 Nt = length(t);
 Y_obs = zeros(length(I),Nt,N);

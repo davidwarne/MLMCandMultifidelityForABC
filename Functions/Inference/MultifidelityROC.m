@@ -24,11 +24,11 @@ function [eta1,eta2,p_fp,p_fn,p_tp,p_tn,ctilde,cp,cn,rho_dist,rho_dist_approx] =
 %
 % 
 % Authors:
-%   Thomas P. Prescott[1] (prescott@maths.ox.ac.uk)
+%   Thomas P. Prescott[1] (tprescott@turing.ac.uk)
 %   David J. Warne[2,3,4] (david.warne@qut.edu.au)
 %   
 % Affiliations:
-%   [1] Mathematical Institute, University of Oxford, UK
+%   [1] The Alan Turing Institute, London, UK
 %   [2] School of Mathematical Sciences, Queensland University of Technology, Autralia
 %   [3] Centre for Data Science, Queensland University of Technology, Autralia
 %   [4] ARC Centre of Excellence for Mathematical and Statistical Frontiers

@@ -18,9 +18,12 @@ function [Y_obs] = GenerateObservations(bcrn,k,X0,N,I,t,sigma)
 %     a Table of observations Y_obs
 %
 % Author:
-%   David J. Warne (david.warne@qut.edu.au)
-%         School of Mathematical Sciences
-%         Queensland University of Technology
+%   David J. Warne[1,2,3] (david.warne@qut.edu.au)
+%   
+% Affiliations:
+%   [1] School of Mathematical Sciences, Queensland University of Technology, Autralia
+%   [2] Centre for Data Science, Queensland University of Technology, Autralia
+%   [3] ARC Centre of Excellence for Mathematical and Statistical Frontiers
 
 Nt = length(t);
 Y_obs = zeros(length(I),Nt,N);

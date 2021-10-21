@@ -1,11 +1,10 @@
 function [E,V,F]= ABCAdaptiveGradientMultifidelityMLMC(N,M,p,supp0,s_cpl,rho,epsilon,...
                           s_approx,rho_approx,epsilon_approx,f,h)
-%% Multilevel Monte Carlo Sampler for approximate Bayesian computaion to compute
-% the posterior mean
+%% Multilevel Monte Carlo Sampler for approximate Bayesian computation
+% to compute expectation E[f(theta)] with respect to the ABC posterior
 %
 % Inputs:
-%    N - A sequence of sample sizes if length(N) == 1, then N is the number of trial
-%        samples at each level determine optimal N
+%    N - A sequence of sample sizes 
 %    M - A sequence of number of burnin samples
 %    p - prior distribution sampler, 
 %    supp0 - initial support region for sampling
@@ -27,18 +26,13 @@ function [E,V,F]= ABCAdaptiveGradientMultifidelityMLMC(N,M,p,supp0,s_cpl,rho,eps
 %
 % Authors:
 %   David J. Warne[1,2,3] (david.warne@qut.edu.au)
-%   Thomas P. Prescott[4] (prescott@maths.ox.ac.uk)
+%   Thomas P. Prescott[4] (tprescott@turing.ac.uk)
 %   
 % Affiliations:
 %   [1] School of Mathematical Sciences, Queensland University of Technology, Autralia
 %   [2] Centre for Data Science, Queensland University of Technology, Autralia
 %   [3] ARC Centre of Excellence for Mathematical and Statistical Frontiers
-%   [4] Mathematical Institute, University of Oxford, UK
-
-% determine trial N
-if length(N) == 1
-    N = ABCMLMCN(N,M,p,supp0,s_cpl,rho,epsilon,s_approx,rho_approx,epsilon_approx,f,h)
-end
+%   [4] The Alan Turing Institute, London, UK
 
 % initialise
 L = length(epsilon);
@@ -62,24 +56,15 @@ for l=1:L
         s_approx{l},rho_approx{l},epsilon_approx(l),f);
     % compute marginal eCDFs and support
     for j=1:k
-        % TODO: determine the MF version of this (really the MF version of ksdensity)
        Fl{j} = @(t) ppval(interp1(x(j,:),ksdensity(theta{l}(j,:),x(j,:),'weights',weights{l}, ...
                    'Support','positive','BoundaryCorrection','reflection',...
                    'Function','cdf'),'pchip','pp'),t);       
-        %lb = @(t) max(Fl(repmat(x(j,:)',[1,length(t)])) .*...
-        %              (repmat(x(j,:)',[1,length(t)]) <= repmat(t,[length(x(j,:)),1]))...
-        %                 - C*(repmat(x(j,:)',[1,length(t)]) > repmat(t,[length(x(j,:)),1])));
-        %ub = @(t) min(Fl(repmat(x(j,:)',[1,length(t)])) .*...
-        %              (repmat(x(j,:)',[1,length(t)]) >= repmat(t,[length(x(j,:)),1]))...
-        %             + C*(repmat(x(j,:)',[1,length(t)]) < repmat(t,[length(x(j,:)),1])));
-        %eFl{j} = @(t) ppval(interp1(x(j,:),lb(x(j,:))/2 + ub(x(j,:))/2,'pchip','pp'),t);
         supp.l(j) = min(theta{l}(j,:));
         supp.u(j) = max(theta{l}(j,:));
     end
     if l == 1
         % compute initial F and F^-1
         for j=1:k
-          %F{j} = @(t) ppval(interp1(x(j,:),eFl{j}(x(j,:)),'pchip','pp'),t); 
            F{j} = @(t) ppval(interp1(x(j,:),Fl{j}(x(j,:)),'pchip','pp'),t); 
            [~,I] = unique(F{j}(x(j,:)));
            Finv{j} = @(u) ppval(interp1(F{j}(x(j,I)),x(j,I),'pchip','pp'),u); 
@@ -98,7 +83,7 @@ for l=1:L
             Flm1 = @(t) ppval(interp1(x(j,:),ksdensity(theta_lm1(j,:),x(j,:), ...
                        'Support','positive','BoundaryCorrection','reflection',...
                        'Function','cdf'),'pchip','pp'),t);
-            Yl = @(t) Fl{j}(t) - Flm1(t); % maybe = @(t) eFl{j}(t) - Flm1(t)
+            Yl = @(t) Fl{j}(t) - Flm1(t); 
             Fu = @(t) F{j}(t) + Yl(t);
             % monotonicity correction
             % F(x) = [u(x) +l(x)]/2

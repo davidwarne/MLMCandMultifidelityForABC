@@ -1,28 +1,28 @@
-# MATLAB Code Examples of Simulation and Compuational Inference for Stochastic Biochemical Reaction Networks
+# MATLAB Code implementations of multifidelity multilevel Monte Carlo for accelerated 
+# approximate Bayesian inference for stochastic biochemical reaction networks
 
-This repository contains useful example MATLAB functions and scripts as an introduction to 
-stochastic simulation and computational inference methods applied to stochastic models of biochemical reaction networks.
+This repository contains reference MATLAB functions and scripts to demonstrate the multifiledity multilevel Monte Carlo approach for approximate Bayesian computation (MF-MLMC-ABC).
 
-## Developer
+## Developers
 
-David J. Warne (david.warne@qut.edu.au),
-                School of Mathematical Sciences, 
-                Science and Engineering Faculty, 
-                Queensland Univeristy of Technology 
-                
-Google Scholar: (https://scholar.google.com.au/citations?user=t8l-kuoAAAAJ&hl=en)
+David J. Warne$^{1,2,3}$ (david.warne@qut.edu.au), https://scholar.google.com.au/citations?user=t8l-kuoAAAAJ&hl=en
+
+Thomas P. Prescott$^4$, https://scholar.google.com/citations?user=6fh76OQAAAAJ&hl=en
+
+1. School of Mathematical Sciences, Faculty of Science, Queensland Univeristy of Technology, Australia
+2. Centre for Data Science, Queensland University of Technology, Australia
+3. ARC Centre of Excellence for Mathematical and Statistical Frontiers, Australia
+4. The Alan Turing Institute, London, United Kingdom
 
 ## Citation Information
 
 This code is provided as supplementary information to the paper,
 
-David J Warne, Ruth E Baker, and Matthew J Simpson. Simulation and inference 
-algorithms for stochastic biochemical reaction networks: from basic concepts 
-to state-of-the-art. Journal of the Royal Society Interface, 16(151):20180943 DOI:[10.1098/rsif.2018.0943](https://royalsocietypublishing.org/doi/10.1098/rsif.2018.0943). 
+David J Warne, Thomas P Prescott, Ruth E Baker, and Matthew J Simpson. Multifidelity multilevel Monte Carlo to accelerate approximate Bayesian parameter inference for partially observed stochastic processes. ArXiv preprint (TBA) 
 
 ## Licensing
 This source code is licensed under the GNU General Public License Version 3.
-Copyright (C) 2018 David J. Warne
+Copyright (C) 2021 David J. Warne
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -39,34 +39,32 @@ Copyright (C) 2018 David J. Warne
 
 ## Contents
 
-This folder contains a number of instructive MATLAB implementations 
-for Stochastic simulation and computational inference. Demonstration scripts
-showing typical usage are also provided
 ```bash
 The directory structure is as follows
 |-- init.m                                  Adds all functions to the MATLAB Path
 |-- Functions
     |-- BCRN_Definition                     Creation of BCRN data structures
         |-- MichaelisMenten.m
-        |-- MonoMolecularChain.m
-    |-- Simulation                          ESSA and ASSA methods and Monte Carlo
+        |-- Repressilator.m
+        |-- TwoStepMAPKCascade.m
+    |-- Simulation                          Exact and approximate simulation schemes and coupling methods
         |-- GillespieDirectMethod.m
         |-- ModifiedNextReactionMethod.m
         |-- TauLeapingMethod.m
         |-- CorTauLeapingMethod.m
-        |-- CMEsolMonoMol.m
-        |-- MonteCarlo.m
-        |-- MonteCarloTauLeap.m
-        |-- MonteCarloBiasCorrection.m
-        |-- MultilevelMonteCarlo.m
-    |-- Inference                           Bayesian and ABC samplers
+        |-- CoupledNextReactionMethod.m
+    |-- Inference                           ABC methods based on Multifidelity and MLMC methods
         |-- GenerateObservations.m
-        |-- likelihoodCMEsolMOnoMol.m
+        |-- GenerateApproximateObservations.m
+        |-- GenerateCoupledObservations.m
         |-- ABCRejectionSampler.m
-        |-- ABCRejectionSamplerV2.m
-        |-- ABCMCMCSampler.m
-        |-- ABCSMCSampler.m
+        |-- MultifidelityROC.m
+        |-- ABCMultifidelity.m
+        |-- ABCAdaptiveGradientMultifidelity.m
         |-- ABCMLMC.m
+        |-- ABCMLMCN.m
+        |-- ABCAdaptiveGradientMultifidelityMLMC.m
+        |-- ABCAdaptiveGradientMultifidelityMLMCN.m
 |-- Demostrations
     |-- Simulation                          Demonstration of simulation algorithms
         |-- DemoGillespie.m

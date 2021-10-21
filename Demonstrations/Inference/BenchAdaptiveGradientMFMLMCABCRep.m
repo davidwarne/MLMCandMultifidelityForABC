@@ -1,15 +1,14 @@
-%% Demonstration of Monte Carlo methods for
-% approximate Bayesian computation 
+%% Demonstration of Monte Carlo methods for approximate Bayesian computation 
 %
 % Authors:
 %   David J. Warne[1,2,3] (david.warne@qut.edu.au)
-%   Thomas P. Prescott[4] (prescott@maths.ox.ac.uk)
+%   Thomas P. Prescott[4] (tprescott@turing.ac.uk)
 %   
 % Affiliations:
 %   [1] School of Mathematical Sciences, Queensland University of Technology, Autralia
 %   [2] Centre for Data Science, Queensland University of Technology, Autralia
 %   [3] ARC Centre of Excellence for Mathematical and Statistical Frontiers
-%   [4] Mathematical Institute, University of Oxford, UK
+%   [4] The Alan Turing Institute, London, UK
 
 
 %
@@ -17,12 +16,10 @@
 rng(513,'twister');
 
 % NOTE: epsilon, tau, N and M provided by external script
-%epsilonL = 350;
-%L = 3;
-%tau = 0.04;
-%N = 1000;
+epsilonL = 350;
+L = 5;
+tau = 0.04;
 % generate data from discrete sampling of a single realisation, 
-% no observation error (set up based on Prescott and Baker 2020)
 k_true = [1;1000;20;2;5;1]; % [alpha0,alpha,K,n,beta,gamma] 
 X0 = [0;40;0;20;0;60];
 t = [0;1;2;3;4;5;6;7;8;9;10];
@@ -94,16 +91,3 @@ for i=1:10
     fprintf('ABC MF MLMC Completed in %f Sec\n',C_mfmlmc);
     save(['Bench_MFMLMC_Rep_epsilon',num2str(epsilonL),'_tau',num2str(tau),'_L',num2str(L),'_',num2str(i),'.mat']);
 end
-%%% Run and Time ABC Multifidelity
-%for i = 1:10
-%    fprintf('Running Adaptive ABC Multifidelity ...\n');
-%    tic;
-%    Ni = N*2^(i-1);
-%    Mi = Ni/10;
-%    [E_mf,V_mf,ESS_mf,Csim_mf,eta1,eta2,pairs] = ABCAdaptiveGradientMultifidelity(Ni,Mi,p,s_cpl,rho,epsilon,s_approx,rho,epsilon,f);
-%    C_mf = toc;
-%    fprintf('ABC Adaptive Multifidelity Completed in %f Sec\n',C_mf)
-%    save(['Bench_AdaptiveMF_Rep_epsilon',num2str(epsilon),'_tau',num2str(tau),'_',num2str(i),'.mat']);
-%end
-%
-

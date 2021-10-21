@@ -1,12 +1,11 @@
-%% Demonstration of Monte Carlo methods for
-% approximate Bayesian computation 
+%% Demonstration of Monte Carlo methods for approximate Bayesian computation 
 %
 % Authors:
-%   Thomas P. Prescott[1] (prescott@maths.ox.ac.uk)
+%   Thomas P. Prescott[1] (tprescott@turing.ac.uk)
 %   David J. Warne[2,3,4] (david.warne@qut.edu.au)
 %   
 % Affiliations:
-%   [1] Mathematical Institute, University of Oxford, UK
+%   [1] The Alan Turing Institute, London, UK
 %   [2] School of Mathematical Sciences, Queensland University of Technology, Autralia
 %   [3] Centre for Data Science, Queensland University of Technology, Autralia
 %   [4] ARC Centre of Excellence for Mathematical and Statistical Frontiers
@@ -16,10 +15,9 @@
 % initialise random number generator for reproducibility
 rng(513,'twister');
 
-% NOTE: epsilon, tau, N and M provided by external script
-%epsilon = 500;
-%tau = 0.01;
-%N = 1000;
+epsilon = 350;
+tau = 0.04;
+N = 10000;
 % generate data from discrete sampling of a single realisation, 
 % no observation error (set up based on Prescott and Baker 2020)
 k_true = [1;1000;20;2;5;1]; % [alpha0,alpha,K,n,beta,gamma] 
@@ -48,7 +46,6 @@ f = @(x) x(1,:);
 %% Set up ABC Mulitfidelity
 s_approx = @(k) GenerateApproxObservations(rep,[k_true(1:2);k;k_true(5:6)],X0,1,Obs_I,t,sig,tau);
 s_cpl = @(k,c1,c2,c3) GenerateCoupledObservations(rep,[k_true(1:2);k;k_true(5:6)],X0,1,Obs_I,t,sig,c1,c2,c3);
-%epsilon = 200;
 p = @() unifrnd(kmin,kmax);
 
 %% Run and Time ABC Multifidelity

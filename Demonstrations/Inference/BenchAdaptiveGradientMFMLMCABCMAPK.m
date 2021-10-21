@@ -1,28 +1,24 @@
-%% Demonstration of Monte Carlo methods for
-% approximate Bayesian computation 
+%% Demonstration of Monte Carlo methods for approximate Bayesian computation 
 %
 % Authors:
 %   David J. Warne[1,2,3] (david.warne@qut.edu.au)
-%   Thomas P. Prescott[4] (prescott@maths.ox.ac.uk)
+%   Thomas P. Prescott[4] (tprescott@turing.ac.uk)
 %   
 % Affiliations:
 %   [1] School of Mathematical Sciences, Queensland University of Technology, Autralia
 %   [2] Centre for Data Science, Queensland University of Technology, Autralia
 %   [3] ARC Centre of Excellence for Mathematical and Statistical Frontiers
-%   [4] Mathematical Institute, University of Oxford, UK
+%   [4] The Alan Turing Institute, London, UK
 
 
 %
 % initialise random number generator for reproducibility
 rng(513,'twister');
 
-% NOTE: epsilon, tau, N and M provided by external script
-%epsilonL = 150;
-%L = 3;
-%tau = 0.5;
-%N = 1000;
+epsilonL = 300;
+L = 7;
+tau = 0.5;
 % generate data from discrete sampling of a single realisation, 
-% no observation error 
 k_true = [0.001;0.001/120;0.18;0.001;0.001/22;0.3;0.0001;0.0001/110;0.2;0.001;0.001/22;0.3];
 X0  = [94;757; 0; 0;32;   0;567;  0; 0;32;   0];
 t = linspace(0,200,100);
@@ -37,7 +33,6 @@ Y_obs = GenerateObservations(MAPK,k_true,X0,1,Obs_I,t,sig);
 rho = @(X_s) sqrt(sum((X_s(:) - Y_obs(:)).^2));
 
 % Simulation as a function of k only
-
 s = @(k) GenerateObservations(MAPK,[k_true(1);k(1);k(2);k_true(4);k(3);k(4);k_true(7);k(5);k(6);k_true(10);k(7);k(8)],X0,1,Obs_I,t,sig);
 % prior support (uniform)
 kmax = [k_true(1);1;k_true(4);1;k_true(7);1;k_true(10);1];
@@ -50,7 +45,6 @@ f = @(x) x(7,:);
 % for the moment assume a fixed tau for all levels
 sl_approx = @(k) GenerateApproxObservations(MAPK,[k_true(1);k(1);k(2);k_true(4);k(3);k(4);k_true(7);k(5);k(6);k_true(10);k(7);k(8)],X0,1,Obs_I,t,sig,tau);
 s_cpl = @(k,c1,c2,c3) GenerateCoupledObservations(MAPK,[k_true(1);k(1);k(2);k_true(4);k(3);k(4);k_true(7);k(5);k(6);k_true(10);k(7);k(8)],X0,1,Obs_I,t,sig,c1,c2,c3);
-%epsilon = 200;
 
 %% Set up ABC MLMC epsilon sequence
 epsilon = zeros(L,1);
@@ -94,16 +88,4 @@ for i=1:10
     fprintf('ABC MF MLMC Completed in %f Sec\n',C_mfmlmc);
     save(['Bench_MFMLMC_MAPK_epsilon',num2str(epsilonL),'_L',num2str(L),'_',num2str(i),'.mat']);
 end
-%%% Run and Time ABC Multifidelity
-%for i = 1:10
-%    fprintf('Running Adaptive ABC Multifidelity ...\n');
-%    tic;
-%    Ni = N*2^(i-1);
-%    Mi = Ni/10;
-%    [E_mf,V_mf,ESS_mf,Csim_mf,eta1,eta2,pairs] = ABCAdaptiveGradientMultifidelity(Ni,Mi,p,s_cpl,rho,epsilon,s_approx,rho,epsilon,f);
-%    C_mf = toc;
-%    fprintf('ABC Adaptive Multifidelity Completed in %f Sec\n',C_mf)
-%    save(['Bench_AdaptiveMF_Rep_epsilon',num2str(epsilon),'_tau',num2str(tau),'_',num2str(i),'.mat']);
-%end
-%
 

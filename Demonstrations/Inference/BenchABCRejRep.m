@@ -1,17 +1,20 @@
-%% Demonstration of Monte Carlo methods for
-% approximate Bayesian computation 
+%% Demonstration of Monte Carlo methods for approximate Bayesian computation 
 %
 % Author:
-%   David J. Warne (david.warne@qut.edu.au)
-%         School of Mathematical Sciences
-%         Queensland University of Technology
+%   David J. Warne[1,2,3] (david.warne@qut.edu.au)
+%   
+% Affiliations:
+%   [1] School of Mathematical Sciences, Queensland University of Technology, Autralia
+%   [2] Centre for Data Science, Queensland University of Technology, Autralia
+%   [3] ARC Centre of Excellence for Mathematical and Statistical Frontiers
 
 
 % initialise random number generator for reproducibility
 rng(513,'twister');
-% NOTE: parameters for the number of levels provided by external script
-%L,epsilonL
-%L = 6;
+
+Ni = 2048
+epsilon = 350
+
 % generate data from discrete sampling of a single realisation, 
 % no observation error (set up based on Prescott and Baker 2020)
 k_true = [1;1000;20;2;5;1]; % [alpha0,alpha,K,n,beta,gamma] 
@@ -28,7 +31,6 @@ Y_obs = GenerateObservations(rep,k_true,X0,1,Obs_I,t,sig);
 rho = @(X_s) sqrt(sum((X_s(:) - Y_obs(:)).^2));
 
 % Simulation as a function of k only
-
 s = @(k) GenerateObservations(rep,[k_true(1:2);k;k_true(5:6)],X0,1,Obs_I,t,sig);
 % prior support (uniform)
 kmax = [30;4];
@@ -39,17 +41,13 @@ f = @(x) x(1,:);
 
 % create uniform joint prior
 p = @() unifrnd(kmin,kmax);
-tic;
-% sequence of sample numbers
 %% Run and time ABC Rejection
-%for i=1:10
-    fprintf('Running ABC Rejection...\n');
-    tic;
-    [theta_rej] = ABCRejectionSampler(Ni,p,s,rho,epsilon);
-    E_rej = mean(f(theta_rej));
-    V_rej = (1/(Ni-1))*(mean(f(theta_rej).^2) - E_rej.^2)
-    C_rej = toc;
-    fprintf('ABC Rejection Completed in %f Sec\n',C_rej);
-    save(['Bench_Rej_Rep_epsilon',num2str(epsilon),'_N',num2str(Ni),'.mat']);
-%end
+fprintf('Running ABC Rejection...\n');
+tic;
+[theta_rej] = ABCRejectionSampler(Ni,p,s,rho,epsilon);
+E_rej = mean(f(theta_rej));
+V_rej = (1/(Ni-1))*(mean(f(theta_rej).^2) - E_rej.^2)
+C_rej = toc;
+fprintf('ABC Rejection Completed in %f Sec\n',C_rej);
+save(['Bench_Rej_Rep_epsilon',num2str(epsilon),'_N',num2str(Ni),'.mat']);
 

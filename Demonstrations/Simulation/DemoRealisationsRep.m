@@ -1,9 +1,12 @@
 %% Demonstration of multiple stochastic realisations
 %
 % Author:
-%   David J. Warne (david.warne@qut.edu.au)
-%         School of Mathematical Sciences
-%         Queensland University of Technology
+%   David J. Warne[1,2,3] (david.warne@qut.edu.au)
+%   
+% Affiliations:
+%   [1] School of Mathematical Sciences, Queensland University of Technology, Autralia
+%   [2] Centre for Data Science, Queensland University of Technology, Autralia
+%   [3] ARC Centre of Excellence for Mathematical and Statistical Frontiers
 
 set(groot, 'defaultAxesTickLabelInterpreter','latex'); 
 set(groot, 'defaultLegendInterpreter','latex');
@@ -30,8 +33,6 @@ for i=1:N
     [X_r{i},t_r{i}] = GillespieDirectMethod(rep,10);
 end
 
-% plot samples with trasparant overlay (hint: for large N, make alpha smaller)
-alpha = 0.5;
 hold on;
 for i=1:N
     Xn = reshape([X_r{i};X_r{i}],size(X_r{i}).*[1,2]); Xn(:,end) = [];
@@ -46,7 +47,6 @@ end
 errorbar(t,Y_obs(1,:),sig*ones(size(Y_obs(1,:))),'k.','LineWidth',2);
 errorbar(t,Y_obs(2,:),sig*ones(size(Y_obs(2,:))),'k.','LineWidth',2);
 errorbar(t,Y_obs(3,:),sig*ones(size(Y_obs(3,:))),'k.','LineWidth',2);
-%errorbar(t,Y_obs-2,)
 xlim([0,10]); ylim([0,400]); legend({'$M_{1,t}$','$P_{1,t}$','$M_{2,t}$','$P_{2,t}$','$M_{3,t}$','$P_{3,t}$','$\mathbf{y}_{obs}(t)$'},'Location','northeastoutside');
 xlabel('time (sec)'); ylabel('copy numbers (molecules)');
 box on

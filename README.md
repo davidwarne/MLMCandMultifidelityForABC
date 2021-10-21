@@ -1,7 +1,6 @@
-# MATLAB Code implementations of multifidelity multilevel Monte Carlo for accelerated 
-# approximate Bayesian inference for stochastic biochemical reaction networks
+# Multifidelity multilevel Monte Carlo for accelerated approximate Bayesian computation
 
-This repository contains reference MATLAB functions and scripts to demonstrate the multifiledity multilevel Monte Carlo approach for approximate Bayesian computation (MF-MLMC-ABC).
+This repository contains reference MATLAB functions and scripts to demonstrate the multifiledity multilevel Monte Carlo approach for approximate Bayesian computation (MF-MLMC-ABC) targeting stochastic models of biochemical reaction networks. 
 
 ## Developers
 

@@ -1,6 +1,5 @@
 function [bcrn] = TwoStepMAPKCascade(k,E0,X0,Y0,P10,P20)
 %% Two step series MAPK enzymatic cascade
-%
 % Enzyme E phosphorates the substrate X to activate the protein and
 % phosphotase P1 desphosphorylates the active protein. The activate X
 % protein acts like an enzyme for the phosphoralation of substrate Y with
@@ -22,7 +21,6 @@ function [bcrn] = TwoStepMAPKCascade(k,E0,X0,Y0,P10,P20)
 %             k7
 % R7: X* + Y -> X*Y
 %             k8
-
 % R8:    X*Y -> X* + Y
 %             k9
 % R9:    X*Y -> X* + Y*
@@ -32,7 +30,6 @@ function [bcrn] = TwoStepMAPKCascade(k,E0,X0,Y0,P10,P20)
 % R11:    Y*P2 -> Y* + P2
 %             k9
 % R12:    Y*P2 -> Y + P2
-
 %    
 % Inputs:
 %    k - vector of kinetic rate parameters 
@@ -44,9 +41,12 @@ function [bcrn] = TwoStepMAPKCascade(k,E0,X0,Y0,P10,P20)
 %    a BCRN struct
 %
 % Author:
-%   David J. Warne (david.warne@qut.edu.au)
-%         School of Mathematical Sciences
-%         Queensland University of Technology
+%   David J. Warne[1,2,3] (david.warne@qut.edu.au)
+%   
+% Affiliations:
+%   [1] School of Mathematical Sciences, Queensland University of Technology, Autralia
+%   [2] Centre for Data Science, Queensland University of Technology, Autralia
+%   [3] ARC Centre of Excellence for Mathematical and Statistical Frontiers
 
 bcrn = struct();
 % rate parameters 
@@ -92,6 +92,5 @@ bcrn.nu_plus = [0,0,1,0,0,0,0,0,0,0,0;
                 0,0,0,0,0,0,1,0,0,1,0]; 
 % stoichiometric matrix
 bcrn.nu = bcrn.nu_plus - bcrn.nu_minus;
-% propensity function
 % propensity function
 bcrn.a = @(X,k) k.*[X(1)*X(2);X(3);X(3);X(4)*X(5);X(6);X(6);X(4)*X(7);X(8);X(8);X(9)*X(10);X(11);X(11)];

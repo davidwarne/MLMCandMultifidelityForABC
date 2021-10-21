@@ -10,9 +10,12 @@ function [X,t] = ModifiedNextReactionMethod(bcrn,T)
 %    t    -  vector of reaction times
 %
 % Author:
-%   David J. Warne (david.warne@qut.edu.au)
-%         School of Mathematical Sciences
-%         Queensland University of Technology
+%   David J. Warne[1,2,3] (david.warne@qut.edu.au)
+%   
+% Affiliations:
+%   [1] School of Mathematical Sciences, Queensland University of Technology, Autralia
+%   [2] Centre for Data Science, Queensland University of Technology, Autralia
+%   [3] ARC Centre of Excellence for Mathematical and Statistical Frontiers
 
 % block size (reallocate a new block every B updates)
 B = 1000;
